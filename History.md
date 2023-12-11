@@ -1,6 +1,23 @@
-unreleased
-==========
+5.0.0 / 2023-12-11
+===================
 
+  * deps: removed safe-buffer
+    - engine: node >= v18.19.0
+    - Use Node Buffer instead of `safe-buffer`
+  * deps: path-to-regexp@6.2.1
+    - BREAKING CHANGE: upgraded from 0.1.7. Route mapping changes e.g. /*, /foo/ handling /foo, no longer work
+    - See https://github.com/pillarjs/path-to-regexp for documentation
+  * deps: removed array-flatten
+    - Replaced with Array.prototype.flat
+    - Removed `utils.flatten`
+  * deps: connect-redis@7.1.0
+  * deps: marked@11.0.0
+  * deps: removed mocha
+    - Replaced mocha with Node Test Runner
+    - Removed `nyc`
+  * Use ES Import for tests
+    - Renamed tests with `.mjs` file extension
+    - Renamed tests with Pascal Casing
   * Fix routing requests without method
   * deps: body-parser@1.20.2
     - Fix strict json error message on Node.js 19+
@@ -2950,7 +2967,7 @@ Closes #805
   * Added route `Collection`, ex: `app.get('/user/:id').remove();`
   * Added support for `app.param(fn)` to define param logic
   * Removed `app.param()` support for callback with return value
-  * Removed module.parent check from express(1) generated app. Closes #670
+  * Removed require.main check from express(1) generated app. Closes #670
   * Refactored router. Closes #639
 
 2.3.6 / 2011-05-20

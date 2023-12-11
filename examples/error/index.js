@@ -47,7 +47,8 @@ app.get('/next', function(req, res, next){
 app.use(error);
 
 /* istanbul ignore next */
-if (!module.parent) {
-  app.listen(3000);
-  console.log('Express started on port 3000');
+if (!require.main) {
+  const server = app.listen();
+  app.close = () => server.close();
+  console.log(`Express started on port ${server.address().port}`);
 }

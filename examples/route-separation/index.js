@@ -22,7 +22,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 /* istanbul ignore next */
-if (!module.parent) {
+if (!require.main) {
   app.use(logger('dev'));
 }
 
@@ -49,7 +49,8 @@ app.put('/user/:id/edit', user.update);
 app.get('/posts', post.list);
 
 /* istanbul ignore next */
-if (!module.parent) {
-  app.listen(3000);
-  console.log('Express started on port 3000');
+if (!require.main) {
+  const server = app.listen();
+  app.close = () => server.close();
+  console.log(`Express started on port ${server.address().port}`);
 }

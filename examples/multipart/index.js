@@ -56,7 +56,8 @@ app.post('/', function(req, res, next){
 });
 
 /* istanbul ignore next */
-if (!module.parent) {
-  app.listen(4000);
-  console.log('Express started on port 4000');
+if (!require.main) {
+  const server = app.listen();
+  app.close = () => server.close();
+  console.log(`Express started on port ${server.address().port}`);
 }

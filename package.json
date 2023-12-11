@@ -38,6 +38,7 @@
     "depd": "^2.0.0",
     "encodeurl": "^1.0.2",
     "escape-html": "^1.0.3",
+    "eslint": "^8.55.0",
     "etag": "^1.8.1",
     "finalhandler": "^1.2.0",
     "fresh": "^0.5.2",
@@ -64,7 +65,6 @@
     "cookie-parser": "^1.4.6",
     "cookie-session": "^2.0.0",
     "ejs": "^3.1.9",
-    "eslint": "^8.55.0",
     "express-session": "^1.17.3",
     "hbs": "^4.2.0",
     "marked": "^11.0.0",
@@ -86,7 +86,7 @@
     "lib/"
   ],
   "scripts": {
-    "lint": "eslint .",
+    "pretest": "eslint .",
     "test": "NODE_ENV=test NO_DEPRECATION='body-parser,express' node --test"
   }
 }

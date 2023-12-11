@@ -1,5 +1,5 @@
 {
-  "name": "express",
+  "name": "@hubot-friends/express",
   "description": "Fast, unopinionated, minimalist web framework",
   "version": "5.0.0",
   "author": "TJ Holowaychuk <tj@vision-media.ca>",
@@ -13,8 +13,11 @@
     "Young Jae Sim <hanul@hanul.me>"
   ],
   "license": "MIT",
-  "repository": "expressjs/express",
-  "homepage": "http://expressjs.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hubot-friends/express.git"
+  },
+  "homepage": "https://github.com/hubot-friends/express/",
   "keywords": [
     "express",
     "framework",
@@ -88,5 +91,15 @@
   "scripts": {
     "pretest": "eslint .",
     "test": "NODE_ENV=test NO_DEPRECATION='body-parser,express' node --test"
+  },
+  "release": {
+    "branches": [
+      "main",
+      "next"
+    ],
+    "dryRun": false
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

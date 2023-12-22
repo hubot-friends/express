@@ -6,7 +6,7 @@ import utils from './support/Utils.mjs'
 
 describe('res.vary()', () => {
   describe('with no arguments', () => {
-    it('should not set Vary', (t, done) => {
+    it('should throw error', (t, done) => {
       const app = express()
 
       app.use((req, res) => {
@@ -16,8 +16,7 @@ describe('res.vary()', () => {
 
       request(app)
       .get('/')
-      .expect(utils.shouldNotHaveHeader('Vary'))
-      .expect(200, done)
+      .expect(500, /field.*required/, done)
     })
   })
 

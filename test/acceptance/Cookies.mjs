@@ -27,7 +27,7 @@ describe('cookies', () => {
       .post('/')
       .type('urlencoded')
       .send({ remember: 1 })
-      .expect(302, function(err, res){
+      .expect(302, (err, res) => {
         if (err) return done(err)
         request(app)
         .get('/')
@@ -43,7 +43,7 @@ describe('cookies', () => {
       .post('/')
       .type('urlencoded')
       .send({ remember: 1 })
-      .expect(302, function(err, res){
+      .expect(302, (err, res) => {
         if (err) return done(err)
         request(app)
         .get('/forget')
@@ -64,7 +64,7 @@ describe('cookies', () => {
       .expect(302, done)
     })
 
-    it('should no set cookie w/o reminder', (t, done) => {
+    it('should not set cookie w/o remember', (t, done) => {
       request(app)
       .post('/')
       .send({})

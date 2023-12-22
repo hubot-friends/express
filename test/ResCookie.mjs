@@ -68,21 +68,6 @@ describe('res', () => {
       .expect(200, done)
     })
 
-    describe('expires', () => {
-      it('should throw on invalid date', (t, done) => {
-        const app = express()
-
-        app.use((req, res) => {
-          res.cookie('name', 'tobi', { expires: new Date(NaN) })
-          res.end()
-        })
-
-        request(app)
-          .get('/')
-          .expect(500, /option expires is invalid/, done)
-      })
-    })
-
     describe('maxAge', () => {
       it('should set relative expires', (t, done) => {
         const app = express()
@@ -127,36 +112,6 @@ describe('res', () => {
         .expect(200, optionsCopy, done)
       })
 
-      it('should not throw on null', (t, done) => {
-        const app = express()
-
-        app.use((req, res) => {
-          res.cookie('name', 'tobi', { maxAge: null })
-          res.end()
-        })
-
-        request(app)
-          .get('/')
-          .expect(200)
-          .expect('Set-Cookie', 'name=tobi; Path=/')
-          .end(done)
-      })
-
-      it('should not throw on undefined', (t, done) => {
-        const app = express()
-
-        app.use((req, res) => {
-          res.cookie('name', 'tobi', { maxAge: undefined })
-          res.end()
-        })
-
-        request(app)
-          .get('/')
-          .expect(200)
-          .expect('Set-Cookie', 'name=tobi; Path=/')
-          .end(done)
-      })
-
       it('should throw an error with invalid maxAge', (t, done) => {
         const app = express()
 
@@ -168,63 +123,6 @@ describe('res', () => {
         request(app)
           .get('/')
           .expect(500, /option maxAge is invalid/, done)
-      })
-    })
-
-    describe('priority', () => {
-      it('should set low priority', (t, done) => {
-        const app = express()
-
-        app.use((req, res) => {
-          res.cookie('name', 'tobi', { priority: 'low' })
-          res.end()
-        })
-
-        request(app)
-          .get('/')
-          .expect('Set-Cookie', /Priority=Low/)
-          .expect(200, done)
-      })
-
-      it('should set medium priority', (t, done) => {
-        const app = express()
-
-        app.use((req, res) => {
-          res.cookie('name', 'tobi', { priority: 'medium' })
-          res.end()
-        })
-
-        request(app)
-          .get('/')
-          .expect('Set-Cookie', /Priority=Medium/)
-          .expect(200, done)
-      })
-
-      it('should set high priority', (t, done) => {
-        const app = express()
-
-        app.use((req, res) => {
-          res.cookie('name', 'tobi', { priority: 'high' })
-          res.end()
-        })
-
-        request(app)
-          .get('/')
-          .expect('Set-Cookie', /Priority=High/)
-          .expect(200, done)
-      })
-
-      it('should throw with invalid priority', (t, done) => {
-        const app = express()
-
-        app.use((req, res) => {
-          res.cookie('name', 'tobi', { priority: 'foobar' })
-          res.end()
-        })
-
-        request(app)
-          .get('/')
-          .expect(500, /option priority is invalid/, done)
       })
     })
 

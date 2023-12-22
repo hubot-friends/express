@@ -5,14 +5,14 @@ import express from '../lib/express.js'
 import request from 'supertest'
 
 describe('req', () => {
-  describe('.acceptsLanguage', () => {
+  describe('.acceptsLanguages', () => {
     it('should return language if accepted', (t, done) => {
       const app = express()
 
       app.get('/', (req, res) => {
         res.send({
-          'en-us': req.acceptsLanguage('en-us'),
-          en: req.acceptsLanguage('en')
+          'en-us': req.acceptsLanguages('en-us'),
+          en: req.acceptsLanguages('en')
         })
       })
 
@@ -27,7 +27,7 @@ describe('req', () => {
 
       app.get('/', (req, res) => {
         res.send({
-          es: req.acceptsLanguage('es')
+          es: req.acceptsLanguages('es')
         })
       })
 
@@ -43,9 +43,9 @@ describe('req', () => {
 
         app.get('/', (req, res) => {
           res.send({
-            en: req.acceptsLanguage('en'),
-            es: req.acceptsLanguage('es'),
-            jp: req.acceptsLanguage('jp')
+            en: req.acceptsLanguages('en'),
+            es: req.acceptsLanguages('es'),
+            jp: req.acceptsLanguages('jp')
           })
         })
 

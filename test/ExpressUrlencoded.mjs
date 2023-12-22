@@ -5,23 +5,10 @@ import express from '../lib/express.js'
 import request from 'supertest'
 import assert from 'node:assert'
 
-async function tryImport (name) {
-  try {
-    return await import(name)
-  } catch (e) {
-    return {}
-  }
-}
-
-const asyncHooks = tryImport('async_hooks')
-const describeAsyncHooks = typeof asyncHooks.AsyncLocalStorage === 'function'
-  ? describe
-  : describe.skip
-
 describe('express.urlencoded()', () => {
   let app = null
   before(() => {
-    app = createApp()
+    app = createApp({extended: true})
   })
 
   it('should parse x-www-form-urlencoded', (t, done) => {
@@ -69,32 +56,6 @@ describe('express.urlencoded()', () => {
       .set('Transfer-Encoding', 'chunked')
       .send('')
       .expect(200, '{}', done)
-  })
-
-  it('should 500 if stream not readable', (t, done) => {
-    const app = express()
-
-    app.use((req, res, next) => {
-      req.on('end', next)
-      req.resume()
-    })
-
-    app.use(express.urlencoded())
-
-    app.use((err, req, res, next) => {
-      res.status(err.status || 500)
-      res.send('[' + err.type + '] ' + err.message)
-    })
-
-    app.post('/', (req, res) => {
-      res.json(req.body)
-    })
-
-    request(app)
-      .post('/')
-      .set('Content-Type', 'application/x-www-form-urlencoded')
-      .send('user=tobi')
-      .expect(500, '[stream.not.readable] stream is not readable', done)
   })
 
   it('should handle duplicated middleware', (t, done) => {
@@ -257,7 +218,7 @@ describe('express.urlencoded()', () => {
         test.set('Content-Encoding', 'gzip')
         test.set('Content-Type', 'application/x-www-form-urlencoded')
         test.write(Buffer.from('1f8b080000000000000bcb4bcc4db57db16e170099a4bad608000000', 'hex'))
-        test.expect(415, '[encoding.unsupported] content encoding unsupported', done)
+        test.expect(415, 'content encoding unsupported', done)
       })
     })
 
@@ -298,15 +259,6 @@ describe('express.urlencoded()', () => {
       test.expect(413, done)
     })
 
-    it('should 413 when inflated body over limit', (t, done) => {
-      const app = createApp({ limit: '1kb' })
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'application/x-www-form-urlencoded')
-      test.write(Buffer.from('1f8b080000000000000a2b2e29b2d51b05a360148c580000a0351f9204040000', 'hex'))
-      test.expect(413, done)
-    })
-
     it('should accept number of bytes', (t, done) => {
       const buff = Buffer.alloc(1024, '.')
       request(createApp({ limit: 1024 }))
@@ -340,15 +292,6 @@ describe('express.urlencoded()', () => {
       test.write(buff)
       test.expect(413, done)
     })
-
-    it('should not error when inflating', (t, done) => {
-      const app = createApp({ limit: '1kb' })
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'application/x-www-form-urlencoded')
-      test.write(Buffer.from('1f8b080000000000000a2b2e29b2d51b05a360148c580000a0351f92040400', 'hex'))
-      test.expect(413, done)
-    })
   })
 
   describe('with parameterLimit option', () => {
@@ -368,7 +311,16 @@ describe('express.urlencoded()', () => {
           .post('/')
           .set('Content-Type', 'application/x-www-form-urlencoded')
           .send(createManyParams(11))
-          .expect(413, '[parameters.too.many] too many parameters', done)
+          .expect(413, /too many parameters/, done)
+      })
+
+      it('should error with type = "parameters.too.many"', (t, done) => {
+        request(createApp({ extended: false, parameterLimit: 10 }))
+          .post('/')
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .set('X-Error-Property', 'type')
+          .send(createManyParams(11))
+          .expect(413, 'parameters.too.many', done)
       })
 
       it('should work when at the limit', (t, done) => {
@@ -423,7 +375,16 @@ describe('express.urlencoded()', () => {
           .post('/')
           .set('Content-Type', 'application/x-www-form-urlencoded')
           .send(createManyParams(11))
-          .expect(413, '[parameters.too.many] too many parameters', done)
+          .expect(413, /too many parameters/, done)
+      })
+
+      it('should error with type = "parameters.too.many"', (t, done) => {
+        request(createApp({ extended: true, parameterLimit: 10 }))
+          .post('/')
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .set('X-Error-Property', 'type')
+          .send(createManyParams(11))
+          .expect(413, 'parameters.too.many', done)
       })
 
       it('should work when at the limit', (t, done) => {
@@ -482,7 +443,7 @@ describe('express.urlencoded()', () => {
           .post('/')
           .set('Content-Type', 'application/x-www-form-urlencoded')
           .send('user=tobi')
-          .expect(200, '{}', done)
+          .expect(200, '', done)
       })
     })
 
@@ -514,7 +475,7 @@ describe('express.urlencoded()', () => {
           .post('/')
           .set('Content-Type', 'application/x-foo')
           .send('user=tobi')
-          .expect(200, '{}', done)
+          .expect(200, '', done)
       })
     })
 
@@ -576,31 +537,30 @@ describe('express.urlencoded()', () => {
         .post('/')
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .send(' user=tobi')
-        .expect(403, '[entity.verify.failed] no leading space', done)
+        .expect(403, 'no leading space', done)
     })
 
-    it('should allow custom codes', (t, done) => {
-      const app = createApp({
-        verify(req, res, buff) {
-          if (buff[0] !== 0x20) return
-          const err = new Error('no leading space')
-          err.status = 400
-          throw err
-        }
+    it('should error with type = "entity.verify.failed"', (t, done) => {
+      const app = createApp(
+      {
+          verify (req, res, buff) {
+            if (buff[0] === 0x20) throw new Error('no leading space')
+          }
       })
 
       request(app)
         .post('/')
         .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('X-Error-Property', 'type')
         .send(' user=tobi')
-        .expect(400, '[entity.verify.failed] no leading space', done)
+        .expect(403, 'entity.verify.failed', done)
     })
 
     it('should allow custom type', (t, done) => {
       const app = createApp({
-        verify(req, res, buff) {
+        verify (req, res, buff) {
           if (buff[0] !== 0x20) return
-          const err = new Error('no leading space')
+          var err = new Error('no leading space')
           err.type = 'foo.bar'
           throw err
         }
@@ -609,13 +569,14 @@ describe('express.urlencoded()', () => {
       request(app)
         .post('/')
         .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('X-Error-Property', 'type')
         .send(' user=tobi')
-        .expect(403, '[foo.bar] no leading space', done)
+        .expect(403, 'foo.bar', done)
     })
 
     it('should allow pass-through', (t, done) => {
       const app = createApp({
-        verify(req, res, buff) {
+        verify (req, res, buff) {
           if (buff[0] === 0x5b) throw new Error('no arrays')
         }
       })
@@ -637,101 +598,7 @@ describe('express.urlencoded()', () => {
       const test = request(app).post('/')
       test.set('Content-Type', 'application/x-www-form-urlencoded; charset=x-bogus')
       test.write(Buffer.from('00000000', 'hex'))
-      test.expect(415, '[charset.unsupported] unsupported charset "X-BOGUS"', done)
-    })
-  })
-
-  describeAsyncHooks('async local storage', () => {
-    before(() => {
-      const app = express()
-      const store = { foo: 'bar' }
-
-      app.use((req, res, next) => {
-        req.asyncLocalStorage = new asyncHooks.AsyncLocalStorage()
-        req.asyncLocalStorage.run(store, next)
-      })
-
-      app.use(express.urlencoded())
-
-      app.use((req, res, next) => {
-        const local = req.asyncLocalStorage.getStore()
-
-        if (local) {
-          res.setHeader('x-store-foo', String(local.foo))
-        }
-
-        next()
-      })
-
-      app.use((err, req, res, next) => {
-        const local = req.asyncLocalStorage.getStore()
-
-        if (local) {
-          res.setHeader('x-store-foo', String(local.foo))
-        }
-
-        res.status(err.status || 500)
-        res.send('[' + err.type + '] ' + err.message)
-      })
-
-      app.post('/', (req, res) => {
-        res.json(req.body)
-      })
-
-      app = app
-    })
-
-    it('should presist store', (t, done) => {
-      request(app)
-        .post('/')
-        .set('Content-Type', 'application/x-www-form-urlencoded')
-        .send('user=tobi')
-        .expect(200)
-        .expect('x-store-foo', 'bar')
-        .expect('{"user":"tobi"}')
-        .end(done)
-    })
-
-    it('should presist store when unmatched content-type', (t, done) => {
-      request(app)
-        .post('/')
-        .set('Content-Type', 'application/fizzbuzz')
-        .send('buzz')
-        .expect(200)
-        .expect('x-store-foo', 'bar')
-        .expect('{}')
-        .end(done)
-    })
-
-    it('should presist store when inflated', (t, done) => {
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'application/x-www-form-urlencoded')
-      test.write(Buffer.from('1f8b080000000000000bcb4bcc4db57db16e170099a4bad608000000', 'hex'))
-      test.expect(200)
-      test.expect('x-store-foo', 'bar')
-      test.expect('{"name":"论"}')
-      test.end(done)
-    })
-
-    it('should presist store when inflate error', (t, done) => {
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'application/x-www-form-urlencoded')
-      test.write(Buffer.from('1f8b080000000000000bcb4bcc4db57db16e170099a4bad6080000', 'hex'))
-      test.expect(400)
-      test.expect('x-store-foo', 'bar')
-      test.end(done)
-    })
-
-    it('should presist store when limit exceeded', (t, done) => {
-      request(app)
-        .post('/')
-        .set('Content-Type', 'application/x-www-form-urlencoded')
-        .send('user=' + Buffer.alloc(1024 * 100, '.').toString())
-        .expect(413)
-        .expect('x-store-foo', 'bar')
-        .end(done)
+      test.expect(415, 'unsupported charset "X-BOGUS"', done)
     })
   })
 
@@ -766,7 +633,7 @@ describe('express.urlencoded()', () => {
       const test = request(app).post('/')
       test.set('Content-Type', 'application/x-www-form-urlencoded; charset=koi8-r')
       test.write(Buffer.from('6e616d653dcec5d4', 'hex'))
-      test.expect(415, '[charset.unsupported] unsupported charset "KOI8-R"', done)
+      test.expect(415, 'unsupported charset "KOI8-R"', done)
     })
   })
 
@@ -814,12 +681,12 @@ describe('express.urlencoded()', () => {
       test.expect(200, '{"name":"论"}', done)
     })
 
-    it('should 415 on unknown encoding', (t, done) => {
+    it('should fail on unknown encoding', (t, done) => {
       const test = request(app).post('/')
       test.set('Content-Encoding', 'nulls')
       test.set('Content-Type', 'application/x-www-form-urlencoded')
       test.write(Buffer.from('000000000000', 'hex'))
-      test.expect(415, '[encoding.unsupported] unsupported content encoding "nulls"', done)
+      test.expect(415, 'unsupported content encoding "nulls"', done)
     })
   })
 })
@@ -848,9 +715,7 @@ function createApp (options) {
 
   app.use((err, req, res, next) => {
     res.status(err.status || 500)
-    res.send(String(req.headers['x-error-property']
-      ? err[req.headers['x-error-property']]
-      : ('[' + err.type + '] ' + err.message)))
+    res.send(String(err[req.headers['x-error-property'] || 'message']))
   })
 
   app.post('/', (req, res) => {

@@ -29,7 +29,7 @@ describe('req', () => {
       request(app)
       .post('/')
       .set('Host', 'example.com:3000')
-      .expect('example.com', done)
+      .expect('example.com:3000', done)
     })
 
     it('should return undefined otherwise', (t, done) => {
@@ -68,7 +68,7 @@ describe('req', () => {
       request(app)
       .post('/')
       .set('Host', '[::1]:3000')
-      .expect('[::1]', done)
+      .expect('[::1]:3000', done)
     })
 
     describe('when "trust proxy" is enabled', () => {

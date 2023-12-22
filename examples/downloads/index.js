@@ -12,7 +12,7 @@ var app = module.exports = express();
 // path to where the files are stored on disk
 var FILES_DIR = path.join(__dirname, 'files')
 
-app.get('/', function(req, res){
+app.get('/', (req, res) => {
   res.send('<ul>' +
     '<li>Download <a href="/files/notes/groceries.txt">notes/groceries.txt</a>.</li>' +
     '<li>Download <a href="/files/amazing.txt">amazing.txt</a>.</li>' +
@@ -23,8 +23,17 @@ app.get('/', function(req, res){
 
 // /files/* is accessed via req.params[0]
 // but here we name it :file
-app.get('/files/:file(.*)', function(req, res, next){
-  res.download(req.params.file, { root: FILES_DIR }, function (err) {
+app.get('/files/:file(.*)', (req, res, next) => {
+  // don't let them sneak out of the FILES_DIR
+  // Background: The code previously relied on resolve-path to do this, but it was removed.
+  var filePath = path.join(FILES_DIR, req.params.file);
+  var normalizedPath = path.normalize(filePath);
+
+  if (!normalizedPath.startsWith(FILES_DIR)) {
+    return res.status(403).send('Forbidden');
+  }
+
+  res.download(req.params.file, { root: FILES_DIR }, err => {
     if (!err) return; // file sent
     if (err.status !== 404) return next(err); // non-404 error
     // file for download not found

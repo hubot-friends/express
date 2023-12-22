@@ -69,34 +69,3 @@ describe('utils.wetag(body, encoding)', () => {
       'W/"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"')
   })
 })
-
-describe('utils.isAbsolute()', () => {
-  it('should support windows', () => {
-    assert(utils.isAbsolute('c:\\'))
-    assert(utils.isAbsolute('c:/'))
-    assert(!utils.isAbsolute(':\\'))
-  })
-
-  it('should support windows unc', () => {
-    assert(utils.isAbsolute('\\\\foo\\bar'))
-  })
-
-  it('should support unices', () => {
-    assert(utils.isAbsolute('/foo/bar'))
-    assert(!utils.isAbsolute('foo/bar'))
-  })
-})
-
-describe('deprecated: utils.flatten(arr) - example using Array.prototype.flat', () => {
-  it('should flatten an array', () => {
-    const arr = ['one', ['two', ['three', 'four'], 'five']]
-    const flat = arr.flat(Infinity)
-    assert.strictEqual(flat.length, 5)
-    assert.strictEqual(flat[0], 'one')
-    assert.strictEqual(flat[1], 'two')
-    assert.strictEqual(flat[2], 'three')
-    assert.strictEqual(flat[3], 'four')
-    assert.strictEqual(flat[4], 'five')
-    assert.ok(flat.every(v => { return typeof v === 'string' }))
-  })
-})

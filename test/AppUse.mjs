@@ -264,22 +264,22 @@ describe('app', () => {
 
     it('should reject string as middleware', () => {
       const app = express()
-      assert.throws(() => { app.use('/', 'foo') }, /requires a middleware function but got a string/)
+      assert.throws(() => { app.use('/', 'foo') }, /argument handler must be a function/)
     })
 
     it('should reject number as middleware', () => {
       const app = express()
-      assert.throws(() => { app.use('/', 42) }, /requires a middleware function but got a number/)
+      assert.throws(() => { app.use('/', 42) }, /argument handler must be a function/)
     })
 
     it('should reject null as middleware', () => {
       const app = express()
-      assert.throws(() => { app.use('/', null) }, /requires a middleware function but got a Null/)
+      assert.throws(() => { app.use('/', null) }, /argument handler must be a function/)
     })
 
     it('should reject Date as middleware', () => {
       const app = express()
-      assert.throws(() => { app.use('/', new Date()) }, /requires a middleware function but got a Date/)
+      assert.throws(() => { app.use('/', new Date()) }, /argument handler must be a function/)
     })
 
     it('should strip path from req.url', (t, done) => {

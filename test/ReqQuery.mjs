@@ -15,17 +15,17 @@ describe('req', () => {
       .expect(200, '{}', done)
     })
 
-    it('should default to parse complex keys', (t, done) => {
+    it('should default to parse simple keys', (t, done) => {
       const app = createApp()
 
       request(app)
       .get('/?user[name]=tj')
-      .expect(200, '{"user":{"name":"tj"}}', done)
+      .expect(200, '{"user[name]":"tj"}', done)
     })
 
     describe('when "query parser" is extended', () => {
       it('should parse complex keys', (t, done) => {
-        const app = createApp('extended')
+        const app = createApp('extended');
 
         request(app)
         .get('/?foo[0][bar]=baz&foo[0][fizz]=buzz&foo[]=done!')
@@ -80,23 +80,6 @@ describe('req', () => {
         request(app)
         .get('/?user%5Bname%5D=tj')
         .expect(200, '{"user[name]":"tj"}', done)
-      })
-    })
-
-    describe('when "query parser fn" is missing', () => {
-      it('should act like "extended"', (t, done) => {
-        const app = express()
-
-        delete app.settings['query parser']
-        delete app.settings['query parser fn']
-
-        app.use((req, res) => {
-          res.send(req.query)
-        })
-
-        request(app)
-        .get('/?user[name]=tj&user.name=tj')
-        .expect(200, '{"user":{"name":"tj"},"user.name":"tj"}', done)
       })
     })
 

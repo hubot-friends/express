@@ -1,91 +1,166 @@
-5.0.0 / 2023-12-11
-===================
+5.x
+===
 
-  * deps: removed safe-buffer
-    - engine: node >= v18.19.0
-    - Use Node Buffer instead of `safe-buffer`
-  * deps: path-to-regexp@6.2.1
-    - BREAKING CHANGE: upgraded from 0.1.7. Route mapping changes e.g. /*, /foo/ handling /foo, no longer work
-    - See https://github.com/pillarjs/path-to-regexp for documentation
-  * deps: removed array-flatten
-    - Replaced with Array.prototype.flat
-    - Removed `utils.flatten`
-  * deps: connect-redis@7.1.0
-  * deps: marked@11.0.0
-  * deps: removed mocha
-    - Replaced mocha with Node Test Runner
-    - Removed `nyc`
-  * Use ES Import for tests
-    - Renamed tests with `.mjs` file extension
-    - Renamed tests with Pascal Casing
-  * Fix routing requests without method
-  * deps: body-parser@1.20.2
-    - Fix strict json error message on Node.js 19+
-    - deps: content-type@~1.0.5
-    - deps: raw-body@2.5.2
+This incorporates all changes after 4.17.2 up to 4.17.3.
 
-4.18.2 / 2022-10-08
-===================
+5.0.0-beta.1 / 2022-02-14
+=========================
 
-  * Fix regression routing a large stack in a single route
-  * deps: body-parser@1.20.1
-    - deps: qs@6.11.0
-    - perf: remove unnecessary object clone
-  * deps: qs@6.11.0
+This is the first Express 5.0 beta release, based off 4.17.2 and includes
+changes from 5.0.0-alpha.8.
 
-4.18.1 / 2022-04-29
-===================
+  * change:
+    - Default "query parser" setting to `'simple'`
+    - Requires Node.js 4+
+    - Use `mime-types` for file to content type mapping
+  * deps: array-flatten@3.0.0
+  * deps: body-parser@2.0.0-beta.1
+    - `req.body` is no longer always initialized to `{}`
+    - `urlencoded` parser now defaults `extended` to `false`
+    - Use `on-finished` to determine when body read
+  * deps: router@2.0.0-beta.1
+    - Add new `?`, `*`, and `+` parameter modifiers
+    - Internalize private `router.process_params` method
+    - Matching group expressions are only RegExp syntax
+    - Named matching groups no longer available by position in `req.params`
+    - Regular expressions can only be used in a matching group
+    - Remove `debug` dependency
+    - Special `*` path segment behavior removed
+    - deps: array-flatten@3.0.0
+    - deps: parseurl@~1.3.3
+    - deps: path-to-regexp@3.2.0
+    - deps: setprototypeof@1.2.0
+  * deps: send@1.0.0-beta.1
+    - Change `dotfiles` option default to `'ignore'`
+    - Remove `hidden` option; use `dotfiles` option instead
+    - Use `mime-types` for file to content type mapping
+    - deps: debug@3.1.0
+  * deps: serve-static@2.0.0-beta.1
+    - Change `dotfiles` option default to `'ignore'`
+    - Remove `hidden` option; use `dotfiles` option instead
+    - Use `mime-types` for file to content type mapping
+    - deps: send@1.0.0-beta.1
 
-  * Fix hanging on large stack of sync routes
+5.0.0-alpha.8 / 2020-03-25
+==========================
 
-4.18.0 / 2022-04-25
-===================
+This is the eighth Express 5.0 alpha release, based off 4.17.1 and includes
+changes from 5.0.0-alpha.7.
 
-  * Add "root" option to `res.download`
-  * Allow `options` without `filename` in `res.download`
-  * Deprecate string and non-integer arguments to `res.status`
-  * Fix behavior of `null`/`undefined` as `maxAge` in `res.cookie`
-  * Fix handling very large stacks of sync middleware
-  * Ignore `Object.prototype` values in settings through `app.set`/`app.get`
-  * Invoke `default` with same arguments as types in `res.format`
-  * Support proper 205 responses using `res.send`
-  * Use `http-errors` for `res.format` error
-  * deps: body-parser@1.20.0
-    - Fix error message for json parse whitespace in `strict`
-    - Fix internal error when inflated body exceeds limit
-    - Prevent loss of async hooks context
-    - Prevent hanging when request already read
-    - deps: depd@2.0.0
-    - deps: http-errors@2.0.0
-    - deps: on-finished@2.4.1
-    - deps: qs@6.10.3
-    - deps: raw-body@2.5.1
-  * deps: cookie@0.5.0
-    - Add `priority` option
-    - Fix `expires` option to reject invalid dates
-  * deps: depd@2.0.0
-    - Replace internal `eval` usage with `Function` constructor
-    - Use instance methods on `process` to check for listeners
-  * deps: finalhandler@1.2.0
-    - Remove set content headers that break response
-    - deps: on-finished@2.4.1
-    - deps: statuses@2.0.1
-  * deps: on-finished@2.4.1
-    - Prevent loss of async hooks context
-  * deps: qs@6.10.3
-  * deps: send@0.18.0
-    - Fix emitted 416 error missing headers property
-    - Limit the headers removed for 304 response
-    - deps: depd@2.0.0
-    - deps: destroy@1.2.0
-    - deps: http-errors@2.0.0
-    - deps: on-finished@2.4.1
-    - deps: statuses@2.0.1
-  * deps: serve-static@1.15.0
-    - deps: send@0.18.0
-  * deps: statuses@2.0.1
-    - Remove code 306
-    - Rename `425 Unordered Collection` to standard `425 Too Early`
+5.0.0-alpha.7 / 2018-10-26
+==========================
+
+This is the seventh Express 5.0 alpha release, based off 4.16.4 and includes
+changes from 5.0.0-alpha.6.
+
+The major change with this alpha is the basic support for returned, rejected
+Promises in the router.
+
+  * remove:
+    - `path-to-regexp` dependency
+  * deps: debug@3.1.0
+    - Add `DEBUG_HIDE_DATE` environment variable
+    - Change timer to per-namespace instead of global
+    - Change non-TTY date format
+    - Remove `DEBUG_FD` environment variable support
+    - Support 256 namespace colors
+  * deps: router@2.0.0-alpha.1
+    - Add basic support for returned, rejected Promises
+    - Fix JSDoc for `Router` constructor
+    - deps: debug@3.1.0
+    - deps: parseurl@~1.3.2
+    - deps: setprototypeof@1.1.0
+    - deps: utils-merge@1.0.1
+
+5.0.0-alpha.6 / 2017-09-24
+==========================
+
+This is the sixth Express 5.0 alpha release, based off 4.15.5 and includes
+changes from 5.0.0-alpha.5.
+
+  * remove:
+    - `res.redirect(url, status)` signature - use `res.redirect(status, url)`
+    - `res.send(status, body)` signature - use `res.status(status).send(body)`
+  * deps: router@~1.3.1
+    - deps: debug@2.6.8
+
+5.0.0-alpha.5 / 2017-03-06
+==========================
+
+This is the fifth Express 5.0 alpha release, based off 4.15.2 and includes
+changes from 5.0.0-alpha.4.
+
+5.0.0-alpha.4 / 2017-03-01
+==========================
+
+This is the fourth Express 5.0 alpha release, based off 4.15.0 and includes
+changes from 5.0.0-alpha.3.
+
+  * remove:
+    - Remove Express 3.x middleware error stubs
+  * deps: router@~1.3.0
+    - Add `next("router")` to exit from router
+    - Fix case where `router.use` skipped requests routes did not
+    - Skip routing when `req.url` is not set
+    - Use `%o` in path debug to tell types apart
+    - deps: debug@2.6.1
+    - deps: setprototypeof@1.0.3
+    - perf: add fast match path for `*` route
+
+5.0.0-alpha.3 / 2017-01-28
+==========================
+
+This is the third Express 5.0 alpha release, based off 4.14.1 and includes
+changes from 5.0.0-alpha.2.
+
+  * remove:
+    - `res.json(status, obj)` signature - use `res.status(status).json(obj)`
+    - `res.jsonp(status, obj)` signature - use `res.status(status).jsonp(obj)`
+    - `res.vary()` (no arguments) -- provide a field name as an argument
+  * deps: array-flatten@2.1.1
+  * deps: path-is-absolute@1.0.1
+  * deps: router@~1.1.5
+    - deps: array-flatten@2.0.1
+    - deps: methods@~1.1.2
+    - deps: parseurl@~1.3.1
+    - deps: setprototypeof@1.0.2
+
+5.0.0-alpha.2 / 2015-07-06
+==========================
+
+This is the second Express 5.0 alpha release, based off 4.13.1 and includes
+changes from 5.0.0-alpha.1.
+
+  * remove:
+    - `app.param(fn)`
+    - `req.param()` -- use `req.params`, `req.body`, or `req.query` instead
+  * change:
+    - `res.render` callback is always async, even for sync view engines
+    - The leading `:` character in `name` for `app.param(name, fn)` is no longer removed
+    - Use `router` module for routing
+    - Use `path-is-absolute` module for absolute path detection
+
+5.0.0-alpha.1 / 2014-11-06
+==========================
+
+This is the first Express 5.0 alpha release, based off 4.10.1.
+
+  * remove:
+    - `app.del` - use `app.delete`
+    - `req.acceptsCharset` - use `req.acceptsCharsets`
+    - `req.acceptsEncoding` - use `req.acceptsEncodings`
+    - `req.acceptsLanguage` - use `req.acceptsLanguages`
+    - `res.json(obj, status)` signature - use `res.json(status, obj)`
+    - `res.jsonp(obj, status)` signature - use `res.jsonp(status, obj)`
+    - `res.send(body, status)` signature - use `res.send(status, body)`
+    - `res.send(status)` signature - use `res.sendStatus(status)`
+    - `res.sendfile` - use `res.sendFile` instead
+    - `express.query` middleware
+  * change:
+    - `req.host` now returns host (`hostname:port`) - use `req.hostname` for only hostname
+    - `req.query` is now a getter instead of a plain property
+  * add:
+    - `app.router` is a reference to the base router
 
 4.17.3 / 2022-02-16
 ===================
@@ -2137,7 +2212,7 @@
  * deps: connect@2.21.0
    - deprecate `connect(middleware)` -- use `app.use(middleware)` instead
    - deprecate `connect.createServer()` -- use `connect()` instead
-   - fix `res.setHeader()` patch to work with get -> append -> set pattern
+   - fix `res.setHeader()` patch to work with with get -> append -> set pattern
    - deps: compression@~1.0.8
    - deps: errorhandler@~1.1.1
    - deps: express-session@~1.5.0
@@ -2967,7 +3042,7 @@ Closes #805
   * Added route `Collection`, ex: `app.get('/user/:id').remove();`
   * Added support for `app.param(fn)` to define param logic
   * Removed `app.param()` support for callback with return value
-  * Removed require.main check from express(1) generated app. Closes #670
+  * Removed module.parent check from express(1) generated app. Closes #670
   * Refactored router. Closes #639
 
 2.3.6 / 2011-05-20
@@ -3348,8 +3423,8 @@ Shaw]
   * Added node v0.1.97 compatibility
   * Added support for deleting cookies via Request#cookie('key', null)
   * Updated haml submodule
-  * Fixed not-found page, now using charset utf-8
-  * Fixed show-exceptions page, now using charset utf-8
+  * Fixed not-found page, now using using charset utf-8
+  * Fixed show-exceptions page, now using using charset utf-8
   * Fixed view support due to fs.readFile Buffers
   * Changed; mime.type() no longer accepts ".type" due to node extname() changes
 
@@ -3384,7 +3459,7 @@ Shaw]
 ==================
 
   * Added charset support via Request#charset (automatically assigned to 'UTF-8' when respond()'s
-    encoding is set to 'utf8' or 'utf-8').
+    encoding is set to 'utf8' or 'utf-8'.
   * Added "encoding" option to Request#render(). Closes #299
   * Added "dump exceptions" setting, which is enabled by default.
   * Added simple ejs template engine support
@@ -3423,7 +3498,7 @@ Shaw]
   * Added [haml.js](http://github.com/visionmedia/haml.js) submodule; removed haml-js
   * Added callback function support to Request#halt() as 3rd/4th arg
   * Added preprocessing of route param wildcards using param(). Closes #251
-  * Added view partial support (with collections etc.)
+  * Added view partial support (with collections etc)
   * Fixed bug preventing falsey params (such as ?page=0). Closes #286
   * Fixed setting of multiple cookies. Closes #199
   * Changed; view naming convention is now NAME.TYPE.ENGINE (for example page.html.haml)

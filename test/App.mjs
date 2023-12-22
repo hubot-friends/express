@@ -57,18 +57,6 @@ describe('app.mountpath', () => {
   })
 })
 
-describe('app.router', () => {
-  it('should throw with notice', (t, done) => {
-    const app = express()
-
-    try {
-      app.router
-    } catch(err) {
-      done()
-    }
-  })
-})
-
 describe('app.path()', () => {
   it('should return the canonical', () => {
     const app = express()

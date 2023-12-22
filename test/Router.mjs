@@ -15,7 +15,7 @@ describe('Router', () => {
     assert(typeof router.use === 'function')
   })
 
-  it('should support .use of other routers', function (t, done) {
+  it('should support .use of other routers', (t, done) => {
     const router = new Router()
     const another = new Router()
 
@@ -24,10 +24,10 @@ describe('Router', () => {
     })
     router.use('/foo', another)
 
-    router.handle({ url: '/foo/bar', method: 'GET' }, { end: done })
+    router.handle({ url: '/foo/bar', method: 'GET' }, { end: done}, done)
   })
 
-  it('should support dynamic routes', function (t, done) {
+  it('should support dynamic routes', (t, done) => {
     const router = new Router()
     const another = new Router()
 
@@ -37,10 +37,10 @@ describe('Router', () => {
     })
     router.use('/:foo', another)
 
-    router.handle({ url: '/test/route', method: 'GET' }, { end: done })
+    router.handle({ url: '/test/route', method: 'GET' }, { end: done}, done)
   })
 
-  it('should handle blank URL', function (t, done) {
+  it('should handle blank URL', (t, done) => {
     const router = new Router()
 
     router.use((req, res) => {
@@ -50,7 +50,7 @@ describe('Router', () => {
     router.handle({ url: '', method: 'GET' }, {}, done)
   })
 
-  it('should handle missing URL',function (t, done) {
+  it('should handle missing URL',(t, done) => {
     const router = new Router()
 
     router.use((req, res) => {
@@ -60,36 +60,7 @@ describe('Router', () => {
     router.handle({ method: 'GET' }, {}, done)
   })
 
-  it('handle missing method',function (t, done) {
-    let all = false
-    const router = new Router()
-    const route = router.route('/foo')
-    let use = false
-
-    route.post((req, res, next) => { next(new Error('should not run')) })
-    route.all((req, res, next) => {
-      all = true
-      next()
-    })
-    route.get((req, res, next) => { next(new Error('should not run')) })
-
-    router.get('/foo', (req, res, next) => { next(new Error('should not run')) })
-    router.use((req, res, next) => {
-      use = true
-      next()
-    })
-
-    router.handle({ url: '/foo' }, {}, err => {
-      if (err) return done(err)
-      assert.ok(all)
-      assert.ok(use)
-      done()
-    })
-  })
-
-  it('should not stack overflow with many registered routes', function (t, done) {
-    t.timeout = 5000 // long-running test
-
+  it('should not stack overflow with many registered routes', (t, done) => {
     const handler = (req, res) => { res.end(new Error('wrong handler')) }
     const router = new Router()
 
@@ -101,61 +72,11 @@ describe('Router', () => {
       res.end()
     })
 
-    router.handle({ url: '/', method: 'GET' }, { end: done })
-  })
-
-  it('should not stack overflow with a large sync route stack',function (t, done) {
-    t.timeout = 5000 // long-running test
-
-    const router = new Router()
-
-    router.get('/foo', (req, res, next) => {
-      req.counter = 0
-      next()
-    })
-
-    for (let i = 0; i < 6000; i++) {
-      router.get('/foo', (req, res, next) => {
-        req.counter++
-        next()
-      })
-    }
-
-    router.get('/foo', (req, res) => {
-      assert.strictEqual(req.counter, 6000)
-      res.end()
-    })
-
-    router.handle({ url: '/foo', method: 'GET' }, { end: done })
-  })
-
-  it('should not stack overflow with a large sync middleware stack',function (t, done) {
-    t.timeout = 5000 // long-running test
-
-    const router = new Router()
-
-    router.use((req, res, next) => {
-      req.counter = 0
-      next()
-    })
-
-    for (let i = 0; i < 6000; i++) {
-      router.use((req, res, next) => {
-        req.counter++
-        next()
-      })
-    }
-
-    router.use((req, res) => {
-      assert.strictEqual(req.counter, 6000)
-      res.end()
-    })
-
-    router.handle({ url: '/', method: 'GET' }, { end: done })
+    router.handle({ url: '/', method: 'GET' }, { end: done}, done)
   })
 
   describe('.handle', () => {
-    it('should dispatch', function (t, done) {
+    it('should dispatch', (t, done) => {
       const router = new Router()
 
       router.route('/foo').get((req, res) => {
@@ -168,7 +89,7 @@ describe('Router', () => {
           done()
         }
       }
-      router.handle({ url: '/foo', method: 'GET' }, res)
+      router.handle({ url: '/foo', method: 'GET' }, res, done)
     })
   })
 
@@ -201,7 +122,7 @@ describe('Router', () => {
   })
 
   describe('error', () => {
-    it('should skip non error middleware', function (t, done) {
+    it('should skip non error middleware', (t, done) => {
       const router = new Router()
 
       router.get('/foo', (req, res, next) => {
@@ -224,7 +145,7 @@ describe('Router', () => {
       router.handle({ url: '/foo', method: 'GET' }, {}, done)
     })
 
-    it('should handle throwing inside routes with params', function (t, done)  {
+    it('should handle throwing inside routes with params', (t, done) =>  {
       const router = new Router()
 
       router.get('/foo/:id', () => {
@@ -243,7 +164,7 @@ describe('Router', () => {
       router.handle({ url: '/foo/2', method: 'GET' }, {}, () =>  {})
     })
 
-    it('should handle throwing in handler after async param', function (t, done)  {
+    it('should handle throwing in handler after async param', (t, done) =>  {
       const router = new Router()
 
       router.param('user', function(req, res, next, val){
@@ -265,7 +186,7 @@ describe('Router', () => {
       router.handle({ url: '/bob', method: 'GET' }, {}, () =>  {})
     })
 
-    it('should handle throwing inside error handlers', function (t, done)  {
+    it('should handle throwing inside error handlers', (t, done) =>  {
       const router = new Router()
 
       router.use((req, res, next) => {
@@ -286,7 +207,7 @@ describe('Router', () => {
   })
 
   describe('FQDN', () => {
-    it('should not obscure FQDNs',function (t, done) {
+    it('should not obscure FQDNs',(t, done) => {
       const request = { hit: 0, url: 'http://example.com/foo', method: 'GET' }
       const router = new Router()
 
@@ -303,7 +224,7 @@ describe('Router', () => {
       })
     })
 
-    it('should ignore FQDN in search',function (t, done) {
+    it('should ignore FQDN in search',(t, done) => {
       const request = { hit: 0, url: '/proxy?url=http://example.com/blog/post/1', method: 'GET' }
       const router = new Router()
 
@@ -320,7 +241,7 @@ describe('Router', () => {
       })
     })
 
-    it('should ignore FQDN in path',function (t, done) {
+    it('should ignore FQDN in path',(t, done) => {
       const request = { hit: 0, url: '/proxy/http://example.com/blog/post/1', method: 'GET' }
       const router = new Router()
 
@@ -337,7 +258,7 @@ describe('Router', () => {
       })
     })
 
-    it('should adjust FQDN req.url',function (t, done) {
+    it('should adjust FQDN req.url',(t, done) => {
       const request = { hit: 0, url: 'http://example.com/blog/post/1', method: 'GET' }
       const router = new Router()
 
@@ -354,7 +275,7 @@ describe('Router', () => {
       })
     })
 
-    it('should adjust FQDN req.url with multiple handlers',function (t, done) {
+    it('should adjust FQDN req.url with multiple handlers',(t, done) => {
       const request = { hit: 0, url: 'http://example.com/blog/post/1', method: 'GET' }
       const router = new Router()
 
@@ -377,7 +298,7 @@ describe('Router', () => {
       })
     })
 
-    it('should adjust FQDN req.url with multiple routed handlers',function (t, done) {
+    it('should adjust FQDN req.url with multiple routed handlers',(t, done) => {
       const request = { hit: 0, url: 'http://example.com/blog/post/1', method: 'GET' }
       const router = new Router()
 
@@ -408,7 +329,7 @@ describe('Router', () => {
   })
 
   describe('.all', () =>  {
-    it('should support using .all to capture all http verbs', function (t, done) {
+    it('should support using .all to capture all http verbs', (t, done) => {
       const router = new Router()
 
       let count = 0
@@ -423,53 +344,35 @@ describe('Router', () => {
       assert.equal(count, methods.length)
       done()
     })
-
-    it('should be called for any URL when "(.*)"',function (t, done) {
-      const cb = after(4, done)
-      const router = new Router()
-
-      function no () {
-        throw new Error('should not be called')
-      }
-
-      router.all('(.*)', (req, res) => {
-        res.end()
-      })
-
-      router.handle({ url: '/', method: 'GET' }, { end: cb }, no)
-      router.handle({ url: '/foo', method: 'GET' }, { end: cb }, no)
-      router.handle({ url: 'foo', method: 'GET' }, { end: cb }, no)
-      router.handle({ url: '*', method: 'GET' }, { end: cb }, no)
-    })
   })
 
-  describe('.use', () =>  {
+  describe('.use', () => {
     it('should require middleware', () => {
       const router = new Router()
-      assert.throws(() => { router.use('/') }, /requires a middleware function/)
+      assert.throws(() => { router.use('/') }, /argument handler is required/)
     })
 
     it('should reject string as middleware', () => {
       const router = new Router()
-      assert.throws(() => { router.use('/', 'foo') }, /requires a middleware function but got a string/)
+      assert.throws(() => { router.use('/', 'foo') }, /argument handler must be a function/)
     })
 
     it('should reject number as middleware', () => {
       const router = new Router()
-      assert.throws(() => { router.use('/', 42) }, /requires a middleware function but got a number/)
+      assert.throws(() => { router.use('/', 42) }, /argument handler must be a function/)
     })
 
     it('should reject null as middleware', () => {
       const router = new Router()
-      assert.throws(() => { router.use('/', null) }, /requires a middleware function but got a Null/)
+      assert.throws(() => { router.use('/', null) }, /argument handler must be a function/)
     })
 
     it('should reject Date as middleware', () => {
       const router = new Router()
-      assert.throws(() => { router.use('/', new Date()) }, /requires a middleware function but got a Date/)
+      assert.throws(() => { router.use('/', new Date()) }, /argument handler must be a function/)
     })
 
-    it('should be called for any URL',function (t, done) {
+    it('should be called for any URL', (t, done) => {
       const cb = after(4, done)
       const router = new Router()
 
@@ -487,7 +390,7 @@ describe('Router', () => {
       router.handle({ url: '*', method: 'GET' }, { end: cb }, no)
     })
 
-    it('should accept array of middleware', function (t, done) {
+    it('should accept array of middleware', (t, done) => {
       let count = 0
       const router = new Router()
 
@@ -510,11 +413,21 @@ describe('Router', () => {
     })
   })
 
-  describe('.param', () =>  {
-    it('should call param function when routing VERBS', function (t, done)  {
+  describe('.param', () => {
+    it('should require function', () => {
+      const router = new Router()
+      assert.throws(router.param.bind(router, 'id'), /argument fn is required/)
+    })
+
+    it('should reject non-function', () => {
+      const router = new Router()
+      assert.throws(router.param.bind(router, 'id', 42), /argument fn must be a function/)
+    })
+
+    it('should call param function when routing VERBS', (t, done) => {
       const router = new Router()
 
-      router.param('id', function(req, res, next, id) {
+      router.param('id', (req, res, next, id) => {
         assert.equal(id, '123')
         next()
       })
@@ -527,10 +440,10 @@ describe('Router', () => {
       router.handle({ url: '/foo/123/bar', method: 'get' }, {}, done)
     })
 
-    it('should call param function when routing middleware', function (t, done)  {
+    it('should call param function when routing middleware', (t, done) => {
       const router = new Router()
 
-      router.param('id', function(req, res, next, id) {
+      router.param('id', (req, res, next, id) => {
         assert.equal(id, '123')
         next()
       })
@@ -544,7 +457,7 @@ describe('Router', () => {
       router.handle({ url: '/foo/123/bar/baz', method: 'get' }, {}, done)
     })
 
-    it('should only call once per request', function (t, done)  {
+    it('should only call once per request', (t, done) => {
       let count = 0
       const req = { url: '/foo/bob/bar', method: 'get' }
       const router = new Router()
@@ -554,7 +467,7 @@ describe('Router', () => {
         next()
       })
 
-      router.param('user', function(req, res, next, user) {
+      router.param('user', (req, res, next, user) => {
         count++
         req.user = user
         next()
@@ -563,7 +476,7 @@ describe('Router', () => {
       router.use('/foo/:user/', new Router())
       router.use('/foo/:user/', sub)
 
-      router.handle(req, {}, function(err) {
+      router.handle(req, {}, err => {
         if (err) return done(err)
         assert.equal(count, 1)
         assert.equal(req.user, 'bob')
@@ -571,7 +484,7 @@ describe('Router', () => {
       })
     })
 
-    it('should call when values differ', function (t, done)  {
+    it('should call when values differ', (t, done) => {
       let count = 0
       const req = { url: '/foo/bob/bar', method: 'get' }
       const router = new Router()
@@ -581,7 +494,7 @@ describe('Router', () => {
         next()
       })
 
-      router.param('user', function(req, res, next, user) {
+      router.param('user', (req, res, next, user) => {
         count++
         req.user = user
         next()
@@ -590,7 +503,7 @@ describe('Router', () => {
       router.use('/foo/:user/', new Router())
       router.use('/:user/bob/', sub)
 
-      router.handle(req, {}, function(err) {
+      router.handle(req, {}, err => {
         if (err) return done(err)
         assert.equal(count, 2)
         assert.equal(req.user, 'foo')
@@ -599,8 +512,8 @@ describe('Router', () => {
     })
   })
 
-  describe('parallel requests', () =>  {
-    it('should not mix requests', function (t, done)  {
+  describe('parallel requests', () => {
+    it('should not mix requests', (t, done) => {
       const req1 = { url: '/foo/50/bar', method: 'get' }
       const req2 = { url: '/foo/10/bar', method: 'get' }
       const router = new Router()

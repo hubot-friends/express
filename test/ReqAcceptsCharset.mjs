@@ -5,13 +5,13 @@ import express from '../lib/express.js'
 import request from 'supertest'
 
 describe('req', () => {
-  describe('.acceptsCharset(type)', () => {
+  describe('.acceptsCharsets(type)', () => {
     describe('when Accept-Charset is not present', () => {
       it('should return true', (t, done) => {
         const app = express()
 
         app.use((req, res, next) => {
-          res.end(req.acceptsCharset('utf-8') ? 'yes' : 'no')
+          res.end(req.acceptsCharsets('utf-8') ? 'yes' : 'no')
         })
 
         request(app)
@@ -25,7 +25,7 @@ describe('req', () => {
         const app = express()
 
         app.use((req, res, next) => {
-          res.end(req.acceptsCharset('utf-8') ? 'yes' : 'no')
+          res.end(req.acceptsCharsets('utf-8') ? 'yes' : 'no')
         })
 
         request(app)
@@ -38,7 +38,7 @@ describe('req', () => {
         const app = express()
 
         app.use((req, res, next) => {
-          res.end(req.acceptsCharset('utf-8') ? 'yes' : 'no')
+          res.end(req.acceptsCharsets('utf-8') ? 'yes' : 'no')
         })
 
         request(app)

@@ -1,6 +1,7 @@
 'use strict'
 
 import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
 import express from '../lib/express.js'
 import request from 'supertest'
 import utils from './support/Utils.mjs'
@@ -62,21 +63,6 @@ describe('res', () => {
     })
   })
 
-  describe('.redirect(url, status)', () => {
-    it('should set the response status', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.redirect('http://google.com', 303)
-      })
-
-      request(app)
-      .get('/')
-      .expect('Location', 'http://google.com')
-      .expect(303, done)
-    })
-  })
-
   describe('when the request method is HEAD', () => {
     it('should ignore the body', (t, done) => {
       const app = express()
@@ -86,11 +72,11 @@ describe('res', () => {
       })
 
       request(app)
-        .head('/')
-        .expect(302)
-        .expect('Location', 'http://google.com')
-        .expect(utils.shouldNotHaveBody())
-        .end(done)
+      .head('/')
+      .expect(302)
+      .expect('Location', 'http://google.com')
+      .expect(shouldNotHaveBody())
+      .end(done)
     })
   })
 
@@ -199,14 +185,20 @@ describe('res', () => {
       })
 
       request(app)
-        .get('/')
-        .set('Accept', 'application/octet-stream')
-        .expect(302)
-        .expect('location', 'http://google.com')
-        .expect('content-length', '0')
-        .expect(utils.shouldNotHaveHeader('Content-Type'))
-        .expect(utils.shouldNotHaveBody())
-        .end(done)
+      .get('/')
+      .set('Accept', 'application/octet-stream')
+      .expect(302)
+      .expect('location', 'http://google.com')
+      .expect('content-length', '0')
+      .expect(utils.shouldNotHaveHeader('Content-Type'))
+      .expect(shouldNotHaveBody())
+      .end(done)
     })
   })
 })
+
+function shouldNotHaveBody () {
+  return res => {
+    assert.ok(res.text === '' || res.text === undefined)
+  }
+}

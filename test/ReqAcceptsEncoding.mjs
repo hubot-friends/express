@@ -11,8 +11,8 @@ describe('req', () => {
 
       app.get('/', (req, res) => {
         res.send({
-          gzip: req.acceptsEncoding('gzip'),
-          deflate: req.acceptsEncoding('deflate')
+          gzip: req.acceptsEncodings('gzip'),
+          deflate: req.acceptsEncodings('deflate')
         })
       })
 
@@ -27,7 +27,7 @@ describe('req', () => {
 
       app.get('/', (req, res) => {
         res.send({
-          bogus: req.acceptsEncoding('bogus')
+          bogus: req.acceptsEncodings('bogus')
         })
       })
 

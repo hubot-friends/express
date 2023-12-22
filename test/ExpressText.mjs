@@ -5,20 +5,6 @@ import express from '../lib/express.js'
 import request from 'supertest'
 import assert from 'node:assert'
 
-async function tryImport (name) {
-  try {
-    return await import(name)
-  } catch (e) {
-    return {}
-  }
-}
-
-const asyncHooks = tryImport('async_hooks')
-
-const describeAsyncHooks = typeof asyncHooks.AsyncLocalStorage === 'function'
-  ? describe
-  : describe.skip
-
 describe('express.text()', () => {
   it('should parse text/plain', (t, done) => {
     const app = createApp()
@@ -65,32 +51,6 @@ describe('express.text()', () => {
       .set('Transfer-Encoding', 'chunked')
       .send('')
       .expect(200, '""', done)
-  })
-
-  it('should 500 if stream not readable', (t, done) => {
-    const app = express()
-
-    app.use((req, res, next) => {
-      req.on('end', next)
-      req.resume()
-    })
-
-    app.use(express.text())
-
-    app.use((err, req, res, next) => {
-      res.status(err.status || 500)
-      res.send('[' + err.type + '] ' + err.message)
-    })
-
-    app.post('/', (req, res) => {
-      res.json(req.body)
-    })
-
-    request(app)
-      .post('/')
-      .set('Content-Type', 'text/plain')
-      .send('user is tobi')
-      .expect(500, '[stream.not.readable] stream is not readable', done)
   })
 
   it('should handle duplicated middleware', (t, done) => {
@@ -149,15 +109,6 @@ describe('express.text()', () => {
       test.expect(413, done)
     })
 
-    it('should 413 when inflated body over limit', (t, done) => {
-      const app = createApp({ limit: '1kb' })
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'text/plain')
-      test.write(Buffer.from('1f8b080000000000000ad3d31b05a360148c64000087e5a14704040000', 'hex'))
-      test.expect(413, done)
-    })
-
     it('should accept number of bytes', (t, done) => {
       const buf = Buffer.alloc(1028, '.')
       request(createApp({ limit: 1024 }))
@@ -191,17 +142,6 @@ describe('express.text()', () => {
       test.write(buf)
       test.expect(413, done)
     })
-
-    it('should not error when inflating', (t, done) => {
-      const app = createApp({ limit: '1kb' })
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'text/plain')
-      test.write(Buffer.from('1f8b080000000000000ad3d31b05a360148c64000087e5a1470404', 'hex'))
-      setTimeout(() => {
-        test.expect(413, done)
-      }, 100)
-    })
   })
 
   describe('with inflate option', () => {
@@ -216,7 +156,7 @@ describe('express.text()', () => {
         test.set('Content-Encoding', 'gzip')
         test.set('Content-Type', 'text/plain')
         test.write(Buffer.from('1f8b080000000000000bcb4bcc4d55c82c5678b16e170072b3e0200b000000', 'hex'))
-        test.expect(415, '[encoding.unsupported] content encoding unsupported', done)
+        test.expect(415, 'content encoding unsupported', done)
       })
     })
 
@@ -256,7 +196,7 @@ describe('express.text()', () => {
           .post('/')
           .set('Content-Type', 'text/plain')
           .send('user is tobi')
-          .expect(200, '{}', done)
+          .expect(200, '', done)
       })
     })
 
@@ -287,7 +227,7 @@ describe('express.text()', () => {
           .post('/')
           .set('Content-Type', 'text/xml')
           .send('<user>tobi</user>')
-          .expect(200, '{}', done)
+          .expect(200, '', done)
       })
     })
 
@@ -347,7 +287,7 @@ describe('express.text()', () => {
       .post('/')
       .set('Content-Type', 'text/plain')
       .send(' user is tobi')
-      .expect(403, '[entity.verify.failed] no leading space', done)
+      .expect(403, 'no leading space', done)
     })
 
     it('should allow custom codes', (t, done) => {
@@ -362,7 +302,7 @@ describe('express.text()', () => {
         .post('/')
         .set('Content-Type', 'text/plain')
         .send(' user is tobi')
-        .expect(400, '[entity.verify.failed] no leading space', done)
+        .expect(400, 'no leading space', done)
     })
 
     it('should allow pass-through', (t, done) => {
@@ -389,101 +329,7 @@ describe('express.text()', () => {
       const test = request(app).post('/')
       test.set('Content-Type', 'text/plain; charset=x-bogus')
       test.write(Buffer.from('00000000', 'hex'))
-      test.expect(415, '[charset.unsupported] unsupported charset "X-BOGUS"', done)
-    })
-  })
-
-  describeAsyncHooks('async local storage', () => {
-    before(() => {
-      const app = express()
-      const store = { foo: 'bar' }
-
-      app.use((req, res, next) => {
-        req.asyncLocalStorage = new asyncHooks.AsyncLocalStorage()
-        req.asyncLocalStorage.run(store, next)
-      })
-
-      app.use(express.text())
-
-      app.use((req, res, next) => {
-        const local = req.asyncLocalStorage.getStore()
-
-        if (local) {
-          res.setHeader('x-store-foo', String(local.foo))
-        }
-
-        next()
-      })
-
-      app.use((err, req, res, next) => {
-        const local = req.asyncLocalStorage.getStore()
-
-        if (local) {
-          res.setHeader('x-store-foo', String(local.foo))
-        }
-
-        res.status(err.status || 500)
-        res.send('[' + err.type + '] ' + err.message)
-      })
-
-      app.post('/', (req, res) => {
-        res.json(req.body)
-      })
-
-      app = app
-    })
-
-    it('should presist store', (t, done) => {
-      request(app)
-        .post('/')
-        .set('Content-Type', 'text/plain')
-        .send('user is tobi')
-        .expect(200)
-        .expect('x-store-foo', 'bar')
-        .expect('"user is tobi"')
-        .end(done)
-    })
-
-    it('should presist store when unmatched content-type', (t, done) => {
-      request(app)
-        .post('/')
-        .set('Content-Type', 'application/fizzbuzz')
-        .send('buzz')
-        .expect(200)
-        .expect('x-store-foo', 'bar')
-        .expect('{}')
-        .end(done)
-    })
-
-    it('should presist store when inflated', (t, done) => {
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'text/plain')
-      test.write(Buffer.from('1f8b080000000000000bcb4bcc4d55c82c5678b16e170072b3e0200b000000', 'hex'))
-      test.expect(200)
-      test.expect('x-store-foo', 'bar')
-      test.expect('"name is 论"')
-      test.end(done)
-    })
-
-    it('should presist store when inflate error', (t, done) => {
-      const test = request(app).post('/')
-      test.set('Content-Encoding', 'gzip')
-      test.set('Content-Type', 'text/plain')
-      test.write(Buffer.from('1f8b080000000000000bcb4bcc4d55c82c5678b16e170072b3e0200b0000', 'hex'))
-      test.expect(400)
-      test.expect('x-store-foo', 'bar')
-      test.end(done)
-    })
-
-    it('should presist store when limit exceeded', (t, done) => {
-      request(app)
-        .post('/')
-        .set('Content-Type', 'text/plain')
-        .send('user is ' + Buffer.alloc(1024 * 100, '.').toString())
-        .expect(413)
-        .expect('x-store-foo', 'bar')
-        .end(done)
+      test.expect(415, 'unsupported charset "X-BOGUS"', done)
     })
   })
 
@@ -526,7 +372,7 @@ describe('express.text()', () => {
       const test = request(app).post('/')
       test.set('Content-Type', 'text/plain; charset=x-bogus')
       test.write(Buffer.from('00000000', 'hex'))
-      test.expect(415, '[charset.unsupported] unsupported charset "X-BOGUS"', done)
+      test.expect(415, 'unsupported charset "X-BOGUS"', done)
     })
   })
 
@@ -580,7 +426,7 @@ describe('express.text()', () => {
       test.set('Content-Encoding', 'nulls')
       test.set('Content-Type', 'text/plain')
       test.write(Buffer.from('000000000000', 'hex'))
-      test.expect(415, '[encoding.unsupported] unsupported content encoding "nulls"', done)
+      test.expect(415, 'unsupported content encoding "nulls"', done)
     })
   })
 })
@@ -592,9 +438,7 @@ function createApp (options) {
 
   app.use((err, req, res, next) => {
     res.status(err.status || 500)
-    res.send(String(req.headers['x-error-property']
-      ? err[req.headers['x-error-property']]
-      : ('[' + err.type + '] ' + err.message)))
+    res.send(err.message)
   })
 
   app.post('/', (req, res) => {

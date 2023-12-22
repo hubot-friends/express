@@ -52,7 +52,7 @@ describe('app', () => {
         assert.ok(b)
         assert.ok(c)
         assert.ok(!d)
-        res.send(204)
+        res.sendStatus(204)
       })
 
       request(app)

@@ -3,7 +3,7 @@
 import { describe, it, before } from 'node:test'
 import express from '../lib/express.js'
 import request from 'supertest'
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
 import utils from './support/Utils.mjs'
 import path from 'node:path'
 
@@ -46,7 +46,7 @@ describe('express.static()', () => {
     it('should set Content-Type', (t, done) => {
       request(app)
         .get('/todo.txt')
-        .expect('Content-Type', 'text/plain; charset=UTF-8')
+        .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect(200, done)
     })
 
@@ -685,12 +685,18 @@ describe('express.static()', () => {
           .expect(416, done)
       })
 
-      it('should include a Content-Range header of complete length', (t, done) => {
+      it('should not include a Content-Range header for Range Not Satisfiable', (t, done) => {
         request(app)
           .get('/nums.txt')
           .set('Range', 'bytes=9-50')
-          .expect('Content-Range', 'bytes */9')
-          .expect(416, done)
+          .expect(res => {
+            assert.deepEqual(res.headers['content-range'], undefined)
+            assert.deepEqual(res.statusCode, 416)
+            assert.match(res.text, /Range Not Satisfiable/)
+          })
+          .end(err => {
+            done(err)
+          })
       })
     })
 

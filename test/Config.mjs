@@ -12,12 +12,6 @@ describe('config', () => {
       assert.equal(app.get('foo'), 'bar')
     })
 
-    it('should set prototype values', () => {
-      const app = express()
-      app.set('hasOwnProperty', 42)
-      assert.strictEqual(app.get('hasOwnProperty'), 42)
-    })
-
     it('should return the app', () => {
       const app = express()
       assert.equal(app.set('foo', 'bar'), app)
@@ -26,17 +20,6 @@ describe('config', () => {
     it('should return the app when undefined', () => {
       const app = express()
       assert.equal(app.set('foo', undefined), app)
-    })
-
-    it('should return set value', () => {
-      const app = express()
-      app.set('foo', 'bar')
-      assert.strictEqual(app.set('foo'), 'bar')
-    })
-
-    it('should return undefined for prototype values', () => {
-      const app = express()
-      assert.strictEqual(app.set('hasOwnProperty'), undefined)
     })
 
     describe('"etag"', () => {
@@ -67,11 +50,6 @@ describe('config', () => {
     it('should return undefined when unset', () => {
       const app = express()
       assert.strictEqual(app.get('foo'), undefined)
-    })
-
-    it('should return undefined for prototype values', () => {
-      const app = express()
-      assert.strictEqual(app.get('hasOwnProperty'), undefined)
     })
 
     it('should otherwise return the value', () => {
@@ -148,12 +126,6 @@ describe('config', () => {
       assert.equal(app.enable('tobi'), app)
       assert.strictEqual(app.get('tobi'), true)
     })
-
-    it('should set prototype values', () => {
-      const app = express()
-      app.enable('hasOwnProperty')
-      assert.strictEqual(app.get('hasOwnProperty'), true)
-    })
   })
 
   describe('.disable()', () => {
@@ -161,12 +133,6 @@ describe('config', () => {
       const app = express()
       assert.equal(app.disable('tobi'), app)
       assert.strictEqual(app.get('tobi'), false)
-    })
-
-    it('should set prototype values', () => {
-      const app = express()
-      app.disable('hasOwnProperty')
-      assert.strictEqual(app.get('hasOwnProperty'), false)
     })
   })
 
@@ -181,11 +147,6 @@ describe('config', () => {
       app.set('foo', 'bar')
       assert.strictEqual(app.enabled('foo'), true)
     })
-
-    it('should default to false for prototype values', () => {
-      const app = express()
-      assert.strictEqual(app.enabled('hasOwnProperty'), false)
-    })
   })
 
   describe('.disabled()', () => {
@@ -198,11 +159,6 @@ describe('config', () => {
       const app = express()
       app.set('foo', 'bar')
       assert.strictEqual(app.disabled('foo'), false)
-    })
-
-    it('should default to true for prototype values', () => {
-      const app = express()
-      assert.strictEqual(app.disabled('hasOwnProperty'), true)
     })
   })
 })

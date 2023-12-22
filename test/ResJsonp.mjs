@@ -329,49 +329,6 @@ describe('res', () => {
     })
   })
 
-  describe('.jsonp(status, object)', () => {
-    it('should respond with json and set the .statusCode', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.jsonp(201, { id: 1 })
-      })
-
-      request(app)
-      .get('/')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(201, '{"id":1}', done)
-    })
-  })
-
-  describe('.jsonp(object, status)', () => {
-    it('should respond with json and set the .statusCode for backwards compat', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.jsonp({ id: 1 }, 201)
-      })
-
-      request(app)
-      .get('/')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(201, '{"id":1}', done)
-    })
-
-    it('should use status as second number for backwards compat', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.jsonp(200, 201)
-      })
-
-      request(app)
-      .get('/')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(201, '200', done)
-    })
-  })
-
   it('should not override previous Content-Types', (t, done) => {
     const app = express()
 

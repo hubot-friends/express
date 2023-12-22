@@ -80,9 +80,4 @@ describe('exports', () => {
     .get('/')
     .expect('bar', done)
   })
-
-  it('should throw on old middlewares', () => {
-    assert.throws(() => { express.bodyParser() }, /Error:.*middleware.*bodyParser/)
-    assert.throws(() => { express.limit() }, /Error:.*middleware.*limit/)
-  })
 })

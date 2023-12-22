@@ -38,7 +38,7 @@ app.get('/forget', function(req, res){
 
 app.post('/', function(req, res){
   var minute = 60000;
-  if (req.body.remember) res.cookie('remember', 1, { maxAge: minute });
+  if (req.body?.remember) res.cookie('remember', 1, { maxAge: minute });
   res.redirect('back');
 });
 

@@ -29,7 +29,8 @@ app1.use((req, res, next) => {
 
 app1.use((err, req, res, next) => {
   if (!err.types) throw err
-  res.send(err.status, 'Supports: ' + err.types.join(', '))
+  res.status(err.status)
+  res.send('Supports: ' + err.types.join(', '))
 })
 
 const app2 = express()
@@ -43,7 +44,8 @@ app2.use((req, res, next) => {
 })
 
 app2.use((err, req, res, next) => {
-  res.send(err.status, 'Supports: ' + err.types.join(', '))
+  res.status(err.status)
+  res.send('Supports: ' + err.types.join(', '))
 })
 
 const app3 = express()
@@ -51,12 +53,7 @@ const app3 = express()
 app3.use((req, res, next) => {
   res.format({
     text: () => { res.send('hey') },
-    default: function (a, b, c) {
-      assert(req === a)
-      assert(res === b)
-      assert(next === c)
-      res.send('default')
-    }
+    default: () => { res.send('default') }
   })
 })
 
@@ -71,7 +68,8 @@ app4.get('/', (req, res) => {
 })
 
 app4.use((err, req, res, next) => {
-  res.send(err.status, 'Supports: ' + err.types.join(', '))
+  res.status(err.status)
+  res.send('Supports: ' + err.types.join(', '))
 })
 
 const app5 = express()
@@ -104,7 +102,8 @@ describe('res', () => {
       })
 
       app.use((err, req, res, next) => {
-        res.send(err.status, 'Supports: ' + err.types.join(', '))
+        res.status(err.status)
+        res.send('Supports: ' + err.types.join(', '))
       })
 
       test(app)
@@ -124,28 +123,6 @@ describe('res', () => {
         .set('Accept', '*/*')
         .expect('hey', done)
       })
-
-      it('should be able to invoke other formatter', (t, done) => {
-        const app = express()
-
-        app.use((req, res, next) => {
-          res.format({
-            json () { res.send('json') },
-            default () {
-              res.header('x-default', '1')
-              this.json()
-            }
-          })
-        })
-
-        request(app)
-          .get('/')
-          .set('Accept', 'text/plain')
-          .expect(200)
-          .expect('x-default', '1')
-          .expect('json')
-          .end(done)
-      })
     })
 
     describe('in router', () => {
@@ -156,7 +133,7 @@ describe('res', () => {
       const app = express()
       const router = express.Router()
 
-      router.get('/', (req, res) => {
+      router.get('/', (req, res, next) => {
         res.format({
           text: () => { res.send('hey') },
           html: () => { res.send('<p>hey</p>') },
@@ -165,7 +142,8 @@ describe('res', () => {
       })
 
       router.use((err, req, res, next) => {
-        res.send(err.status, 'Supports: ' + err.types.join(', '))
+        res.status(err.status)
+        res.send('Supports: ' + err.types.join(', '))
       })
 
       app.use(router)

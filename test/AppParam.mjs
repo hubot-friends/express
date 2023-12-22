@@ -6,47 +6,6 @@ import assert from 'node:assert'
 import request from 'supertest'
 
 describe('app', () => {
-  describe('.param(fn)', () => {
-    it('should map app.param(name, ...) logic', (t, done) => {
-      const app = express()
-
-      app.param((name, regexp) => {
-        if (Object.prototype.toString.call(regexp) === '[object RegExp]') { // See #1557
-          return function(req, res, next, val){
-            var captures
-            if (captures = regexp.exec(String(val))) {
-              req.params[name] = captures[1]
-              next()
-            } else {
-              next('route')
-            }
-          }
-        }
-      })
-
-      app.param(':name', /^([a-zA-Z]+)$/)
-
-      app.get('/user/:name', (req, res) => {
-        res.send(req.params.name)
-      })
-
-      request(app)
-      .get('/user/tj')
-      .expect(200, 'tj', err => {
-        if (err) return done(err)
-        request(app)
-        .get('/user/123')
-        .expect(404, done)
-      })
-
-    })
-
-    it('should fail if not given fn', () => {
-      const app = express()
-      assert.throws(app.param.bind(app, ':name', 'bob'))
-    })
-  })
-
   describe('.param(names, fn)', () => {
     it('should map the array', (t, done) => {
       const app = express()

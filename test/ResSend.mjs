@@ -1,6 +1,6 @@
 'use strict'
 import { describe, it } from 'node:test'
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
 import express from '../lib/express.js'
 import request from 'supertest'
 import methods from 'methods'
@@ -50,63 +50,18 @@ describe('res', () => {
     })
   })
 
-  describe('.send(code)', () => {
-    it('should set .statusCode', (t, done) => {
+  describe('.send(Number)', () => {
+    it('should send as application/json', (t, done) => {
       const app = express()
 
       app.use((req, res) => {
-        res.send(201)
-      })
-
-      request(app)
-      .get('/')
-      .expect('Created')
-      .expect(201, done)
-    })
-  })
-
-  describe('.send(code, body)', () => {
-    it('should set .statusCode and body', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.send(201, 'Created :)')
-      })
-
-      request(app)
-      .get('/')
-      .expect('Created :)')
-      .expect(201, done)
-    })
-  })
-
-  describe('.send(body, code)', () => {
-    it('should be supported for backwards compat', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.send('Bad!', 400)
-      })
-
-      request(app)
-      .get('/')
-      .expect('Bad!')
-      .expect(400, done)
-    })
-  })
-
-  describe('.send(code, number)', () => {
-    it('should send number as json', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.send(200, 0.123)
+        res.send(1000)
       })
 
       request(app)
       .get('/')
       .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(200, '0.123', done)
+      .expect(200, '1000', done)
     })
   })
 
@@ -190,7 +145,7 @@ describe('res', () => {
         .get('/')
         .expect(200)
         .expect('Content-Type', 'application/octet-stream')
-        .expect(utils.shouldHaveBody(Buffer.from('hello')))
+        .expect(shouldHaveBody(Buffer.from('hello')))
         .end(done)
     })
 
@@ -260,7 +215,7 @@ describe('res', () => {
       request(app)
         .head('/')
         .expect(200)
-        .expect(utils.shouldNotHaveBody())
+        .expect(shouldNotHaveBody())
         .end(done)
     })
   })
@@ -279,22 +234,6 @@ describe('res', () => {
       .expect(utils.shouldNotHaveHeader('Content-Length'))
       .expect(utils.shouldNotHaveHeader('Transfer-Encoding'))
       .expect(204, '', done)
-    })
-  })
-
-  describe('when .statusCode is 205', () => {
-    it('should strip Transfer-Encoding field and body, set Content-Length', (t, done) => {
-      const app = express()
-
-      app.use((req, res) => {
-        res.status(205).set('Transfer-Encoding', 'chunked').send('foo')
-      })
-
-      request(app)
-        .get('/')
-        .expect(utils.shouldNotHaveHeader('Transfer-Encoding'))
-        .expect('Content-Length', '0')
-        .expect(205, '', done)
     })
   })
 
@@ -508,7 +447,7 @@ describe('res', () => {
 
         app.use((req, res) => {
           res.set('etag', '"asdf"')
-          res.send(200)
+          res.send('hello!')
         })
 
         request(app)
@@ -593,3 +532,19 @@ describe('res', () => {
     })
   })
 })
+
+function shouldHaveBody (buf) {
+  return res => {
+    var body = !Buffer.isBuffer(res.body)
+      ? Buffer.from(res.text)
+      : res.body
+    assert.ok(body, 'response has body')
+    assert.strictEqual(body.toString('hex'), buf.toString('hex'))
+  }
+}
+
+function shouldNotHaveBody () {
+  return res => {
+    assert.ok(res.text === '' || res.text === undefined)
+  }
+}

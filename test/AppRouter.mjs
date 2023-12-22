@@ -7,6 +7,8 @@ import request from 'supertest'
 import after from 'after'
 import methods from 'methods'
 
+const describePromises = global.Promise ? describe : describe.skip
+
 describe('app.router', () => {
   it('should restore req.params after leaving router', (t, done) => {
     const app = express()
@@ -36,7 +38,7 @@ describe('app.router', () => {
   })
 
   describe('methods', () => {
-    methods.concat('del').forEach(method => {
+    methods.forEach(method => {
       if (method === 'connect') return
 
       it('should include ' + method.toUpperCase(), (t, done) => {
@@ -53,7 +55,7 @@ describe('app.router', () => {
 
       it('should reject numbers for app.' + method, () => {
         const app = express()
-        assert.throws(app[method].bind(app, '/', 3), /Number/)
+        assert.throws(app[method].bind(app, '/', 3), /argument handler must be a function/)
       })
     })
 
@@ -320,7 +322,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id\\:(\\d+)', router)
+      app.use('/user/id:(\\d+)', router)
 
       request(app)
       .get('/user/id:10/profile.json')
@@ -336,7 +338,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id\\:(\\d+)/name\\:(\\w+)', router)
+      app.use('/user/id:(\\d+)/name:(\\w+)', router)
 
       request(app)
       .get('/user/id:10/name:tj/profile')
@@ -347,12 +349,12 @@ describe('app.router', () => {
       const app = express()
       const router = new express.Router({ mergeParams: true })
 
-      router.get('/name\\:(\\w+)', (req, res) => {
+      router.get('/name:(\\w+)', (req, res) => {
         const keys = Object.keys(req.params).sort()
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id\\:(\\d+)', router)
+      app.use('/user/id:(\\d+)', router)
 
       request(app)
       .get('/user/id:10/name:tj')
@@ -368,7 +370,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user', (req, res, next) => {
+      app.use('/user/', (req, res, next) => {
         req.params = 3; // wat?
         router(req, res, next)
       })
@@ -382,11 +384,11 @@ describe('app.router', () => {
       const app = express()
       const router = new express.Router({ mergeParams: true })
 
-      router.get('/user\\:(\\w+)/(.*)', (req, res, next) => {
+      router.get('/user:(\\w+)/*', (req, res, next) => {
         next()
       })
 
-      app.use('/user/id\\:(\\d+)', (req, res, next) => {
+      app.use('/user/id:(\\d+)', (req, res, next) => {
         router(req, res, err => {
           const keys = Object.keys(req.params).sort()
           res.send(keys.map(k => [k, req.params[k]] ))
@@ -452,7 +454,7 @@ describe('app.router', () => {
 
         app.enable('strict routing')
 
-        app.use('/user', (req, res, next) => {
+        app.use('/user/', (req, res, next) => {
           res.setHeader('x-middleware', 'true')
           next()
         })
@@ -481,7 +483,7 @@ describe('app.router', () => {
         .expect('tj', done)
       })
 
-      it('should not match middleware when omitting the trailing slash', (t, done) => {
+      it('should match middleware when omitting the trailing slash', (t, done) => {
         const app = express()
 
         app.enable('strict routing')
@@ -492,7 +494,7 @@ describe('app.router', () => {
 
         request(app)
         .get('/user')
-        .expect(404, done)
+        .expect(200, done)
       })
 
       it('should match middleware', (t, done) => {
@@ -553,23 +555,6 @@ describe('app.router', () => {
     })
   })
 
-  it('should allow escaped regexp', (t, done) => {
-    const app = express()
-
-    app.get('/user/(\\d+)', (req, res) => {
-      res.end('woot')
-    })
-
-    request(app)
-    .get('/user/10')
-    .expect(200, err => {
-      if (err) return done(err)
-      request(app)
-      .get('/user/tj')
-      .expect(404, done)
-    })
-  })
-
   it('should allow literal "."', (t, done) => {
     const app = express()
 
@@ -583,172 +568,6 @@ describe('app.router', () => {
     request(app)
     .get('/api/users/1..50')
     .expect('users from 1 to 50', done)
-  })
-
-  describe('*', () => {
-    it('should capture everything', (t, done) => {
-      const app = express()
-
-      app.get('(.*)', (req, res) => {
-        res.end(req.params[0])
-      })
-
-      request(app)
-      .get('/user/tobi.json')
-      .expect('/user/tobi.json', done)
-    })
-
-    it('should decode the capture', (t, done) => {
-      const app = express()
-
-      app.get('(.*)', (req, res) => {
-        res.end(req.params[0])
-      })
-
-      request(app)
-      .get('/user/tobi%20and%20loki.json')
-      .expect('/user/tobi and loki.json', done)
-    })
-
-    it('should denote a greedy capture group', (t, done) => {
-      const app = express()
-
-      app.get('/user/(.*).json', (req, res) => {
-        res.end(req.params[0])
-      })
-
-      request(app)
-      .get('/user/tj.json')
-      .expect('tj', done)
-    })
-
-    it('should work with several', (t, done) => {
-      const app = express()
-
-      app.get('/api/(.*).(.*)', (req, res) => {
-        const resource = req.params[0]
-          , format = req.params[1]
-        res.end(resource + ' as ' + format)
-      })
-
-      request(app)
-      .get('/api/users/foo.bar.json')
-      .expect('users/foo.bar as json', done)
-    })
-
-    it('should work cross-segment', (t, done) => {
-      const app = express()
-      const cb = after(2, done)
-
-      app.get('/api(.*)', (req, res) => {
-        res.send(req.params[0])
-      })
-
-      request(app)
-        .get('/api')
-        .expect(200, '', cb)
-
-      request(app)
-        .get('/api/hey')
-        .expect(200, '/hey', cb)
-    })
-
-    it('should allow naming', (t, done) => {
-      const app = express()
-
-      app.get('/api/:resource(.*)', (req, res) => {
-        const resource = req.params.resource
-        res.end(resource)
-      })
-
-      request(app)
-      .get('/api/users/0.json')
-      .expect('users/0.json', done)
-    })
-
-    it('should not be greedy immediately after param', (t, done) => {
-      const app = express()
-
-      app.get('/user/:user*', (req, res) => {
-        res.end(req.params.user)
-      })
-
-      request(app)
-      .get('/user/122')
-      .expect('122', done)
-    })
-
-    it('should eat everything after /', (t, done) => {
-      const app = express()
-
-      app.get('/user/:user/:splat*', (req, res) => {
-        res.end(req.params.user)
-      })
-
-      request(app)
-      .get('/user/122/aaa')
-      .expect('122', done)
-    })
-
-    it('should span multiple segments', (t, done) => {
-      const app = express()
-
-      app.get('/file/(.*)', (req, res) => {
-        res.end(req.params[0])
-      })
-
-      request(app)
-      .get('/file/javascripts/jquery.js')
-      .expect('javascripts/jquery.js', done)
-    })
-
-    it('should be optional', (t, done) => {
-      const app = express()
-
-      app.get('/file/:splat*', (req, res) => {
-        res.end(req.params[0])
-      })
-
-      request(app)
-      .get('/file/')
-      .expect('', done)
-    })
-
-    it('should require a preceding /', (t, done) => {
-      const app = express()
-
-      app.get('/file/(.*)', (req, res) => {
-        res.end(req.params[0])
-      })
-
-      request(app)
-      .get('/file')
-      .expect(404, done)
-    })
-
-    it('should keep correct parameter indexes', (t, done) => {
-      const app = express()
-
-      app.get('/(.*)/user/:id', (req, res) => {
-        res.send(req.params)
-      })
-
-      request(app)
-      .get('/1/user/2')
-      .expect(200, '{"0":"1","id":"2"}', done)
-    })
-
-    it('should work within arrays', (t, done) => {
-      const app = express()
-
-      app.get(['/user/:id', '/foo/:splat*', '/:bar'], (req, res) => {
-        res.send(req.params.bar)
-      })
-
-      request(app)
-      .get('/test')
-      .expect(200, 'test', done)
-    })
   })
 
   describe(':name', () => {
@@ -792,7 +611,7 @@ describe('app.router', () => {
       const app = express()
       const cb = after(2, done)
 
-      app.get('/user(s)?/:user/:op', (req, res) => {
+      app.get('/user(s?)/:user/:op', (req, res) => {
         res.end(req.params.op + 'ing ' + req.params.user + (req.params[0] ? ' (old)' : ''))
       })
 
@@ -863,6 +682,82 @@ describe('app.router', () => {
     })
   })
 
+  describe(':name*', () => {
+    it('should match one segment', (t, done) => {
+      const app = express()
+
+      app.get('/user/:user*', (req, res) => {
+        res.end(req.params.user)
+      })
+
+      request(app)
+        .get('/user/122')
+        .expect('122', done)
+    })
+
+    it('should match many segments', (t, done) => {
+      const app = express()
+
+      app.get('/user/:user*', (req, res) => {
+        res.end(req.params.user)
+      })
+
+      request(app)
+        .get('/user/1/2/3/4')
+        .expect('1/2/3/4', done)
+    })
+
+    it('should match zero segments', (t, done) => {
+      const app = express()
+
+      app.get('/user/:user*', (req, res) => {
+        res.end(req.params.user)
+      })
+
+      request(app)
+        .get('/user')
+        .expect('', done)
+    })
+  })
+
+  describe(':name+', () => {
+    it('should match one segment', (t, done) => {
+      const app = express()
+
+      app.get('/user/:user+', (req, res) => {
+        res.end(req.params.user)
+      })
+
+      request(app)
+        .get('/user/122')
+        .expect(200, '122', done)
+    })
+
+    it('should match many segments', (t, done) => {
+      const app = express()
+
+      app.get('/user/:user+', (req, res) => {
+        res.end(req.params.user)
+      })
+
+      request(app)
+        .get('/user/1/2/3/4')
+        .expect(200, '1/2/3/4', done)
+    })
+
+    it('should not match zero segments', (t, done) => {
+      const app = express()
+
+      app.get('/user/:user+', (req, res) => {
+        res.end(req.params.user)
+      })
+
+      request(app)
+        .get('/user')
+        .expect(404, done)
+    })
+  })
+
   describe('.:name', () => {
     it('should denote a format', (t, done) => {
       const app = express()
@@ -911,7 +806,7 @@ describe('app.router', () => {
         next()
       })
 
-      app.get('/bar', () => {
+      app.get('/bar', (req, res) => {
         assert(0)
       })
 
@@ -920,7 +815,7 @@ describe('app.router', () => {
         next()
       })
 
-      app.get('/foo', (req, res) => {
+      app.get('/foo', (req, res, next) => {
         calls.push('/foo 2')
         res.json(calls)
       })
@@ -940,7 +835,7 @@ describe('app.router', () => {
         next('route')
       }
 
-      app.get('/foo', fn, (req, res) => {
+      app.get('/foo', fn, (req, res, next) => {
         res.end('failure')
       })
 
@@ -965,11 +860,11 @@ describe('app.router', () => {
         next('router')
       }
 
-      router.get('/foo', fn, (req, res) => {
+      router.get('/foo', fn, (req, res, next) => {
         res.end('failure')
       })
 
-      router.get('/foo', (req, res) => {
+      router.get('/foo', (req, res, next) => {
         res.end('failure')
       })
 
@@ -996,7 +891,7 @@ describe('app.router', () => {
         next()
       })
 
-      app.get('/bar', () => {
+      app.get('/bar', (req, res) => {
         assert(0)
       })
 
@@ -1005,11 +900,11 @@ describe('app.router', () => {
         next(new Error('fail'))
       })
 
-      app.get('/foo', () => {
+      app.get('/foo', (req, res, next) => {
         assert(0)
       })
 
-      app.use((err, req, res, next) => {
+      app.use(function(err, req, res, next){
         res.json({
           calls: calls,
           error: err.message
@@ -1048,6 +943,138 @@ describe('app.router', () => {
     })
   })
 
+  describePromises('promise support', () => {
+    it('should pass rejected promise value', (t, done) => {
+      const app = express()
+      const router = new express.Router()
+
+      router.use(function createError (req, res, next) {
+        return Promise.reject(new Error('boom!'))
+      })
+
+      router.use(function sawError (err, req, res, next) {
+        res.send('saw ' + err.name + ': ' + err.message)
+      })
+
+      app.use(router)
+
+      request(app)
+      .get('/')
+      .expect(200, 'saw Error: boom!', done)
+    })
+
+    it('should pass rejected promise without value', (t, done) => {
+      const app = express()
+      const router = new express.Router()
+
+      router.use(function createError (req, res, next) {
+        return Promise.reject()
+      })
+
+      router.use(function sawError (err, req, res, next) {
+        res.send('saw ' + err.name + ': ' + err.message)
+      })
+
+      app.use(router)
+
+      request(app)
+      .get('/')
+      .expect(200, 'saw Error: Rejected promise', done)
+    })
+
+    it('should ignore resolved promise', (t, done) => {
+      const app = express()
+      const router = new express.Router()
+
+      router.use(function createError (req, res, next) {
+        res.send('saw GET /foo')
+        return Promise.resolve('foo')
+      })
+
+      router.use(() => {
+        done(new Error('Unexpected middleware invoke'))
+      })
+
+      app.use(router)
+
+      request(app)
+      .get('/foo')
+      .expect(200, 'saw GET /foo', done)
+    })
+
+    describe('error handling', () => {
+      it('should pass rejected promise value', (t, done) => {
+        const app = express()
+        const router = new express.Router()
+
+        router.use(function createError (req, res, next) {
+          return Promise.reject(new Error('boom!'))
+        })
+
+        router.use(function handleError (err, req, res, next) {
+          return Promise.reject(new Error('caught: ' + err.message))
+        })
+
+        router.use(function sawError (err, req, res, next) {
+          res.send('saw ' + err.name + ': ' + err.message)
+        })
+
+        app.use(router)
+
+        request(app)
+        .get('/')
+        .expect(200, 'saw Error: caught: boom!', done)
+      })
+
+      it('should pass rejected promise without value', (t, done) => {
+        const app = express()
+        const router = new express.Router()
+
+        router.use(function createError (req, res, next) {
+          return Promise.reject()
+        })
+
+        router.use(function handleError (err, req, res, next) {
+          return Promise.reject(new Error('caught: ' + err.message))
+        })
+
+        router.use(function sawError (err, req, res, next) {
+          res.send('saw ' + err.name + ': ' + err.message)
+        })
+
+        app.use(router)
+
+        request(app)
+        .get('/')
+        .expect(200, 'saw Error: caught: Rejected promise', done)
+      })
+
+      it('should ignore resolved promise', (t, done) => {
+        const app = express()
+        const router = new express.Router()
+
+        router.use(function createError (req, res, next) {
+          return Promise.reject(new Error('boom!'))
+        })
+
+        router.use(function handleError (err, req, res, next) {
+          res.send('saw ' + err.name + ': ' + err.message)
+          return Promise.resolve('foo')
+        })
+
+        router.use(() => {
+          done(new Error('Unexpected middleware invoke'))
+        })
+
+        app.use(router)
+
+        request(app)
+        .get('/foo')
+        .expect(200, 'saw Error: boom!', done)
+      })
+    })
+  })
+
   it('should allow rewriting of the url', (t, done) => {
     const app = express()
 
@@ -1070,7 +1097,7 @@ describe('app.router', () => {
     const app = express()
     const path = []
 
-    app.get('/:splat*', (req, res, next) => {
+    app.get('/:path+', (req, res, next) => {
       path.push(0)
       next()
     })
@@ -1090,7 +1117,7 @@ describe('app.router', () => {
       next()
     })
 
-    app.get('/:splat*', (req, res, next) => {
+    app.get('/(.*)', (req, res, next) => {
       path.push(4)
       next()
     })

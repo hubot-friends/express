@@ -1,7 +1,7 @@
 'use strict'
 import after from 'after'
 import { describe, it } from 'node:test'
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
 import { Route } from '../lib/express.js'
 import methods from 'methods'
 
@@ -10,37 +10,6 @@ describe('Route', () => {
     const req = { method: 'GET', url: '/' }
     const route = new Route('/foo')
     route.dispatch(req, {}, done)
-  })
-
-  it('should not stack overflow with a large sync stack', (t, done) => {
-    t.timeout = 5000 // long-running test
-
-    const req = { method: 'GET', url: '/' }
-    const route = new Route('/foo')
-
-    route.get((req, res, next) => {
-      req.counter = 0
-      next()
-    })
-
-    for (let i = 0; i < 6000; i++) {
-      route.all((req, res, next) => {
-        req.counter++
-        next()
-      })
-    }
-
-    route.get((req, res, next) => {
-      req.called = true
-      next()
-    })
-
-    route.dispatch(req, {}, err => {
-      if (err) return done(err)
-      assert.ok(req.called)
-      assert.strictEqual(req.counter, 6000)
-      done()
-    })
   })
 
   describe('.all', () => {

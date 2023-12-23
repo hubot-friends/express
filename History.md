@@ -1,3 +1,8 @@
+6.x
+===
+
+  * deps: Remove setprototypeof
+
 5.x
 ===
 

@@ -21,9 +21,6 @@ and so on. Badges should resolve properly (not display a broken image).
 Possible badges include:
 - npm version: `[![NPM Version][npm-image]][npm-url]`
 - npm downloads: `[![NPM Downloads][downloads-image]][downloads-url]`
-- Build status: `[![Build Status][travis-image]][travis-url]`
-- Test coverage: `[![Test Coverage][coveralls-image]][coveralls-url]`
-- Tips: `[![Gratipay][gratipay-image]][gratipay-url]`
 
 **Summary**: Following badges, provide a one- or two-sentence description of
 what the module does. This should be the same as the npmjs.org blurb (which

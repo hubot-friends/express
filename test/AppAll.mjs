@@ -27,7 +27,7 @@ describe('app.all()', () => {
     const app = express()
     let n = 0
 
-    app.all('/*', (req, res, next) => {
+    app.all('/(.*)', (req, res, next) => {
       if (n++) return done(new Error('DELETE called several times'))
       next()
     })

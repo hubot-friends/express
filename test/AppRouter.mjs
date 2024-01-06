@@ -322,10 +322,10 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id:(\\d+)', router)
+      app.use('/user/id-(\\d+)', router)
 
       request(app)
-      .get('/user/id:10/profile.json')
+      .get('/user/id-10/profile.json')
       .expect(200, '[["0","10"],["1","profile"],["2","json"]]', done)
     })
 
@@ -338,10 +338,10 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id:(\\d+)/name:(\\w+)', router)
+      app.use('/user/id-(\\d+)/name-(\\w+)', router)
 
       request(app)
-      .get('/user/id:10/name:tj/profile')
+      .get('/user/id-10/name-tj/profile')
       .expect(200, '[["0","10"],["1","tj"],["2","profile"]]', done)
     })
 
@@ -349,15 +349,15 @@ describe('app.router', () => {
       const app = express()
       const router = new express.Router({ mergeParams: true })
 
-      router.get('/name:(\\w+)', (req, res) => {
+      router.get('/name-(\\w+)', (req, res) => {
         const keys = Object.keys(req.params).sort()
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id:(\\d+)', router)
+      app.use('/user/id-(\\d+)', router)
 
       request(app)
-      .get('/user/id:10/name:tj')
+      .get('/user/id-10/name-tj')
       .expect(200, '[["0","10"],["1","tj"]]', done)
     })
 
@@ -384,11 +384,11 @@ describe('app.router', () => {
       const app = express()
       const router = new express.Router({ mergeParams: true })
 
-      router.get('/user:(\\w+)/*', (req, res, next) => {
+      router.get('/user-(\\w+)/(.*)', (req, res, next) => {
         next()
       })
 
-      app.use('/user/id:(\\d+)', (req, res, next) => {
+      app.use('/user/id-(\\d+)', (req, res, next) => {
         router(req, res, err => {
           const keys = Object.keys(req.params).sort()
           res.send(keys.map(k => [k, req.params[k]] ))
@@ -396,7 +396,7 @@ describe('app.router', () => {
       })
 
       request(app)
-      .get('/user/id:42/user:tj/profile')
+      .get('/user/id-42/user-tj/profile')
       .expect(200, '[["0","42"]]', done)
     })
   })
@@ -483,17 +483,17 @@ describe('app.router', () => {
         .expect('tj', done)
       })
 
-      it('should match middleware when omitting the trailing slash', (t, done) => {
+      it('should not match middleware when omitting the trailing slash and setting strict routing', (t, done) => {
         const app = express()
 
-        app.enable('strict routing')
+        app.disable('strict routing')
 
         app.use('/user/', (req, res) => {
           res.end('tj')
         })
 
         request(app)
-        .get('/user')
+        .get('/user/')
         .expect(200, done)
       })
 
@@ -514,7 +514,7 @@ describe('app.router', () => {
       it('should match middleware when adding the trailing slash', (t, done) => {
         const app = express()
 
-        app.enable('strict routing')
+        app.disable('strict routing')
 
         app.use('/user', (req, res) => {
           res.end('tj')

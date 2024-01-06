@@ -14,11 +14,12 @@ describe('app', () => {
 
   it('should be callable', () => {
     const app = express()
-    assert.equal(typeof app, 'function')
+    assert.equal(typeof app.handle, 'function')
   })
 
   it('should 404 without routes', (t, done) => {
-    request(express())
+    const app = express()
+    request(app.handle.bind(app))
     .get('/')
     .expect(404, done)
   })

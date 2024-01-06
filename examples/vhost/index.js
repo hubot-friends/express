@@ -43,8 +43,8 @@ redirect.use(function(req, res){
 
 var app = module.exports = express();
 
-app.use(vhost('*.example.com', redirect)); // Serves all subdomains via Redirect app
-app.use(vhost('example.com', main)); // Serves top level domain via Main server app
+app.use(vhost('*.example.com', redirect.handle.bind(redirect))); // Serves all subdomains via Redirect app
+app.use(vhost('example.com', main.handle.bind(main))); // Serves top level domain via Main server app
 
 /* istanbul ignore next */
 if (!require.main) {

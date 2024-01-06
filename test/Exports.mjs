@@ -1,6 +1,7 @@
 'use strict'
 
 import { describe, it } from 'node:test'
+import ExpressApp from '../lib/application.js'
 import express from '../lib/express.js'
 import request from 'supertest'
 import assert from 'node:assert'
@@ -35,49 +36,49 @@ describe('exports', () => {
     assert.equal(express.urlencoded.length, 1)
   })
 
-  it('should expose the application prototype', () => {
-    assert.strictEqual(typeof express.application, 'object')
-    assert.strictEqual(typeof express.application.set, 'function')
-  })
-
-  it('should expose the request prototype', () => {
-    assert.strictEqual(typeof express.request, 'object')
-    assert.strictEqual(typeof express.request.accepts, 'function')
-  })
-
-  it('should expose the response prototype', () => {
-    assert.strictEqual(typeof express.response, 'object')
-    assert.strictEqual(typeof express.response.send, 'function')
-  })
-
-  it('should permit modifying the .application prototype', () => {
-    express.application.foo = () => 'bar'
-    assert.strictEqual(express().foo(), 'bar')
-  })
-
-  it('should permit modifying the .request prototype', (t, done) => {
-    express.request.foo = () => 'bar'
-    const app = express()
+  it('should permit adding to the .request', (t, done) => {
+    class CustomApp extends ExpressApp {
+      constructor() {
+        super()
+        this.request = {
+          foo () {
+            return 'bar'
+          }
+        }
+      }
+    }
+    const app = express(CustomApp)
+    const server = app.listen()
 
     app.use((req, res, next) => {
       res.end(req.foo())
     })
 
-    request(app)
+    request(server)
     .get('/')
-    .expect('bar', done)
+    .expect('bar', () => server.close(done))
   })
 
-  it('should permit modifying the .response prototype', (t, done) => {
-    express.response.foo = function() { this.send('bar') }
-    const app = express()
+  it('should permit adding to the .response', (t, done) => {
+    class CustomApp extends ExpressApp {
+      constructor() {
+        super()
+        this.response = {
+          foo () {
+            this.send('bar')
+          }
+        }
+      }
+    }
+    const app = express(CustomApp)
+    const server = app.listen()
 
     app.use((req, res, next) => {
       res.foo()
     })
 
-    request(app)
+    request(server)
     .get('/')
-    .expect('bar', done)
+    .expect('bar', () => server.close(done))
   })
 })

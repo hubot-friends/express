@@ -14,11 +14,11 @@ describe('app.all()', () => {
       res.end(req.method)
     })
 
-    request(app)
+    request(app.handle.bind(app))
       .put('/tobi')
       .expect(200, 'PUT', cb)
 
-    request(app)
+    request(app.handle.bind(app))
       .get('/tobi')
       .expect(200, 'GET', cb)
   })
@@ -27,12 +27,12 @@ describe('app.all()', () => {
     const app = express()
     let n = 0
 
-    app.all('/*', (req, res, next) => {
+    app.all('/(.*)', (req, res, next) => {
       if (n++) return done(new Error('DELETE called several times'))
       next()
     })
 
-    request(app)
+    request(app.handle.bind(app))
     .del('/tobi')
     .expect(404, done)
   })

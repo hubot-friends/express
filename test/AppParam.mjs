@@ -9,7 +9,7 @@ describe('app', () => {
   describe('.param(names, fn)', () => {
     it('should map the array', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param(['id', 'uid'], function(req, res, next, id){
         id = Number(id)
         if (isNaN(id)) return next('route')
@@ -27,13 +27,16 @@ describe('app', () => {
         res.send((typeof id) + ':' + id)
       })
 
-      request(app)
+      request(server)
         .get('/user/123')
         .expect(200, 'number:123', err => {
-          if (err) return done(err)
+          if (err) {
+            server.close()
+            return done(err)
+          }
           request(app)
             .get('/post/123')
-            .expect('number:123', done)
+            .expect('number:123', () => server.close(done))
         })
     })
   })
@@ -41,7 +44,7 @@ describe('app', () => {
   describe('.param(name, fn)', () => {
     it('should map logic for a single param', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('id', function(req, res, next, id){
         id = Number(id)
         if (isNaN(id)) return next('route')
@@ -54,13 +57,14 @@ describe('app', () => {
         res.send((typeof id) + ':' + id)
       })
 
-      request(app)
+      request(server)
         .get('/user/123')
-        .expect(200, 'number:123', done)
+        .expect(200, 'number:123', () => server.close(done))
     })
 
     it('should only call once per request', (t, done) => {
       const app = express()
+      const server = app.listen()
       var called = 0
       var count = 0
 
@@ -82,13 +86,14 @@ describe('app', () => {
         res.end([count, called, req.user].join(' '))
       })
 
-      request(app)
+      request(server)
       .get('/foo/bob')
-      .expect('2 1 bob', done)
+      .expect('2 1 bob', ()=> server.close(done))
     })
 
     it('should call when values differ', (t, done) => {
       const app = express()
+      const server = app.listen()
       var called = 0
       var count = 0
 
@@ -110,14 +115,14 @@ describe('app', () => {
         res.end([count, called, req.users.join(',')].join(' '))
       })
 
-      request(app)
+      request(server)
       .get('/foo/bob')
-      .expect('2 2 foo,bob', done)
+      .expect('2 2 foo,bob', ()=> server.close(done))
     })
 
     it('should support altering req.params across routes', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('user', function(req, res, next, user) {
         req.params.user = 'loki'
         next()
@@ -130,14 +135,14 @@ describe('app', () => {
         res.send(req.params.user)
       })
 
-      request(app)
+      request(server)
       .get('/bob')
-      .expect('loki', done)
+      .expect('loki', ()=> server.close(done))
     })
 
     it('should not invoke without route handler', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('thing', function(req, res, next, thing) {
         req.thing = thing
         next()
@@ -155,14 +160,14 @@ describe('app', () => {
         res.send(req.thing)
       })
 
-      request(app)
+      request(server)
       .get('/bob')
-      .expect(200, 'bob', done)
+      .expect(200, 'bob', ()=> server.close(done))
     })
 
     it('should work with encoded values', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('name', function(req, res, next, name){
         req.params.name = name
         next()
@@ -173,14 +178,14 @@ describe('app', () => {
         res.send('' + name)
       })
 
-      request(app)
+      request(server)
       .get('/user/foo%25bar')
-      .expect('foo%bar', done)
+      .expect('foo%bar', ()=> server.close(done))
     })
 
     it('should catch thrown error', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('id', function(req, res, next, id){
         throw new Error('err!')
       })
@@ -190,14 +195,14 @@ describe('app', () => {
         res.send('' + id)
       })
 
-      request(app)
+      request(server)
       .get('/user/123')
-      .expect(500, done)
+      .expect(500, server.close(done))
     })
 
     it('should catch thrown secondary error', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('id', function(req, res, next, val){
         process.nextTick(next)
       })
@@ -211,14 +216,14 @@ describe('app', () => {
         res.send('' + id)
       })
 
-      request(app)
+      request(server)
       .get('/user/123')
-      .expect(500, done)
+      .expect(500, ()=> server.close(done))
     })
 
     it('should defer to next route', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('id', function(req, res, next, id){
         next('route')
       })
@@ -232,14 +237,14 @@ describe('app', () => {
         res.send('name')
       })
 
-      request(app)
+      request(server)
       .get('/user/123')
-      .expect('name', done)
+      .expect('name', ()=> server.close(done))
     })
 
     it('should defer all the param routes', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.param('id', function(req, res, next, val){
         if (val === 'new') return next('route')
         return next()
@@ -257,13 +262,14 @@ describe('app', () => {
         res.send('get.new')
       })
 
-      request(app)
+      request(server)
       .get('/user/new')
-      .expect('get.new', done)
+      .expect('get.new', () => server.close(done))
     })
 
     it('should not call when values differ on error', (t, done) => {
       const app = express()
+      const server = app.listen()
       var called = 0
       var count = 0
 
@@ -288,13 +294,14 @@ describe('app', () => {
         res.send([count, called, err.message].join(' '))
       })
 
-      request(app)
+      request(server)
       .get('/foo/bob')
-      .expect(500, '0 1 err!', done)
+      .expect(500, '0 1 err!', ()=> server.close(done))
     })
 
     it('should call when values differ when using "next"', (t, done) => {
       const app = express()
+      const server = app.listen()
       var called = 0
       var count = 0
 
@@ -317,9 +324,9 @@ describe('app', () => {
         res.end([count, called, req.user].join(' '))
       })
 
-      request(app)
+      request(server)
       .get('/foo/bob')
-      .expect('1 2 bob', done)
+      .expect('1 2 bob', ()=> server.close(done))
     })
   })
 })

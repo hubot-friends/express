@@ -483,17 +483,17 @@ describe('app.router', () => {
         .expect('tj', done)
       })
 
-      it('should match middleware when omitting the trailing slash', (t, done) => {
+      it('should not match middleware when omitting the trailing slash and setting strict routing', (t, done) => {
         const app = express()
 
-        app.enable('strict routing')
+        app.disable('strict routing')
 
         app.use('/user/', (req, res) => {
           res.end('tj')
         })
 
         request(app)
-        .get('/user')
+        .get('/user/')
         .expect(200, done)
       })
 
@@ -514,7 +514,7 @@ describe('app.router', () => {
       it('should match middleware when adding the trailing slash', (t, done) => {
         const app = express()
 
-        app.enable('strict routing')
+        app.disable('strict routing')
 
         app.use('/user', (req, res) => {
           res.end('tj')

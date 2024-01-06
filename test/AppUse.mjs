@@ -505,25 +505,26 @@ describe('app', () => {
 
     it('should support regexp path', (t, done) => {
       const app = express()
-      const cb = after(4, done)
+      const server = app.listen()
+      const cb = after(4, () => server.close(done))
 
       app.use(/^\/[a-z]oo/, (req, res) => {
         res.send('saw ' + req.method + ' ' + req.url + ' through ' + req.originalUrl)
       })
 
-      request(app)
+      request(server)
       .get('/')
       .expect(404, cb)
 
-      request(app)
+      request(server)
       .get('/foo')
       .expect(200, 'saw GET / through /foo', cb)
 
-      request(app)
+      request(server)
       .get('/zoo/bear')
       .expect(200, 'saw GET /bear through /zoo/bear', cb)
 
-      request(app)
+      request(server)
       .get('/get/zoo')
       .expect(404, cb)
     })

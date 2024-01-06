@@ -10,7 +10,7 @@ describe('app', () => {
   describe('.request', () => {
     it('should extend the request prototype', (t, done) => {
       const app = express()
-
+      const server = app.listen()
       app.request.querystring = function () {
         return new URL(this.url, 'http://localhost').search.replace('?', '')
       }
@@ -19,15 +19,17 @@ describe('app', () => {
         res.end(req.querystring())
       })
 
-      request(app)
+      request(server)
       .get('/foo?name=tobi')
-      .expect('name=tobi', done)
+      .expect('name=tobi', ()=> server.close(done))
     })
 
     it('should only extend for the referenced app', (t, done) => {
       const app1 = express()
       const app2 = express()
       const cb = after(2, done)
+      app1.name = 'app1'
+      app2.name = 'app2'
 
       app1.request.foobar = function () {
         return 'tobi'
@@ -54,6 +56,8 @@ describe('app', () => {
       const app1 = express()
       const app2 = express()
       const cb = after(2, done)
+      app1.name = 'app1'
+      app2.name = 'app2'
 
       app1.request.foobar = () => {
         return 'tobi'
@@ -114,7 +118,8 @@ describe('app', () => {
       const app1 = express()
       const app2 = express()
       const cb = after(2, done)
-
+      app1.name = 'app1'
+      app2.name = 'app2'
       app1.request.foobar = () => {
         return 'tobi'
       }

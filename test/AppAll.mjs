@@ -14,11 +14,11 @@ describe('app.all()', () => {
       res.end(req.method)
     })
 
-    request(app)
+    request(app.handle.bind(app))
       .put('/tobi')
       .expect(200, 'PUT', cb)
 
-    request(app)
+    request(app.handle.bind(app))
       .get('/tobi')
       .expect(200, 'GET', cb)
   })
@@ -32,7 +32,7 @@ describe('app.all()', () => {
       next()
     })
 
-    request(app)
+    request(app.handle.bind(app))
     .del('/tobi')
     .expect(404, done)
   })

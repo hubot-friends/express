@@ -4,7 +4,7 @@ Fast, unopinionated, minimalist web framework for [node](http://nodejs.org).
 
 [![NPM Version][npm-image]][npm-url]
 
-[![NPM Downloads][downloads-image]][downloads-url]
+[![NPM Downloads][downloads-image]][downloads-image]
 
 ```js
 const express = require('express')
@@ -147,4 +147,4 @@ The current lead maintainer is [Douglas Christopher Wilson](https://github.com/d
 [ci-url]: https://github.com/hubot-friends/express/actions
 [npm-image]: https://img.shields.io/npm/v/@hubot-friends/express.svg
 [npm-url]: https://npmjs.org/package/@hubot-friends/express
-[downloads-url]: https://npmjs.org/package/@hubot-friends/express
+[downloads-image]: https://img.shields.io/npm/dm/@hubot-friends/express.svg

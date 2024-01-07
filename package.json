@@ -1,7 +1,7 @@
 {
   "name": "@hubot-friends/express",
   "description": "Fast, unopinionated, minimalist web framework",
-  "version": "5.0.0",
+  "version": "0.0.0-development",
   "author": "TJ Holowaychuk <tj@vision-media.ca>",
   "contributors": [
     "Aaron Heckmann <aaron.heckmann+github@gmail.com>",
@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "after": "^0.8.2",
+    "autocannon": "^7.14.0",
     "connect-redis": "^7.1.0",
     "cookie-parser": "^1.4.6",
     "cookie-session": "^2.0.0",
@@ -90,7 +91,8 @@
   ],
   "scripts": {
     "pretest": "eslint .",
-    "test": "NODE_ENV=test NO_DEPRECATION='body-parser,express' node --test"
+    "test": "NODE_ENV=test NO_DEPRECATION='body-parser,express' node --test",
+    "benchmark": "node benchmarks/index.mjs"
   },
   "release": {
     "branches": [

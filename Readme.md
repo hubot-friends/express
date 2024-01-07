@@ -1,9 +1,10 @@
 [![Express Logo](https://i.cloudup.com/zfY6lL7eFa-3000x3000.png)](http://expressjs.com/)
 
-  Fast, unopinionated, minimalist web framework for [node](http://nodejs.org).
+Fast, unopinionated, minimalist web framework for [node](http://nodejs.org).
 
-  [![NPM Version][npm-image]][npm-url]
-  [![NPM Downloads][downloads-image]][downloads-url]
+[![NPM Version][npm-image]][npm-url]
+
+[![NPM Downloads][downloads-image]][downloads-url]
 
 ```js
 const express = require('express')
@@ -143,6 +144,7 @@ The current lead maintainer is [Douglas Christopher Wilson](https://github.com/d
 
   [MIT](LICENSE)
 
-[ci-url]: https://github.com/expressjs/express/actions?query=workflow%3Aci
-[npm-image]: https://img.shields.io/npm/v/express.svg
-[npm-url]: https://npmjs.org/package/express
+[ci-url]: https://github.com/hubot-friends/express/actions
+[npm-image]: https://img.shields.io/npm/v/@hubot-friends/express.svg
+[npm-url]: https://npmjs.org/package/@hubot-friends/express
+[downloads-url]: https://npmjs.org/package/@hubot-friends/express

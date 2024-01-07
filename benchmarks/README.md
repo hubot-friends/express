@@ -77,3 +77,14 @@ Redesigned Express to not create a prototype chain on the req/res objects. The f
 | Req/Sec | 56,255 | 56,255 | 64,511 | 66,495 | 63,388.8 | 3,687.84 | 56,241 |
 | Bytes/Sec | 13.4 MB | 13.4 MB | 15.4 MB | 15.8 MB | 15.1 MB | 877 kB | 13.4 MB |
 
+## Version 3 - 1/6/2024, 7:19:01 PM
+
+| Stat | 2.5% | 50% | 97.5% | 99% | Avg | Stdev | Max |
+|:-----|:----:|:---:|:-----:|:---:|:---:|:-----:|:---:|
+| Latency | 8 ms | 18 ms | 20 ms | 22 ms | 15.4 ms | 18.39 ms | 667 ms |
+
+| Stat | 1% | 2.5% | 50% | 97.5% | Avg | Stdev | Min |
+|:-----|:--:|:----:|:---:|:-----:|:---:|:-----:|:---:|
+| Req/Sec | 52,095 | 52,095 | 65,439 | 65,855 | 62,758.4 | 5,344.96 | 52,088 |
+| Bytes/Sec | 12.4 MB | 12.4 MB | 15.6 MB | 15.7 MB | 14.9 MB | 1.27 MB | 12.4 MB |
+

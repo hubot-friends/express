@@ -107,22 +107,20 @@ while (n--) {
 app.use((req, res) => {
   res.send('Hello World')
 })
-app.on('listening', function () {
-  const { port } = this.address()
-  autocannon({
-    url: `http://localhost:${port}/?foo[bar]=baz`,
-    pipelining: 10, 
-    connections: 100,
-    duration: 5,
-    title: 'Version 3',
-    workers: 4
-  }, (err, result) => {
-    console.log(toTable(result))
-    fs.appendFile(`benchmarks/README.md`, `## ${result.title} - ${new Date().toLocaleString()}
+const server = app.listen()
+const { port } = server.address()
+autocannon({
+  url: `http://localhost:${port}/?foo[bar]=baz`,
+  pipelining: 10, 
+  connections: 100,
+  duration: 5,
+  title: 'Version 3',
+  workers: 4
+}, (err, result) => {
+  console.log(toTable(result))
+  fs.appendFile(`benchmarks/README.md`, `## ${result.title} - ${new Date().toLocaleString()}
 ${toTable(result)}\n`, 'utf8', () => {
-        server.close()
-    })
+      server.close()
   })
 })
-const server = app.listen()
 

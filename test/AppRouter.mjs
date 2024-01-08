@@ -13,6 +13,7 @@ describe('app.router', () => {
   it('should restore req.params after leaving router', (t, done) => {
     const app = express()
     const router = new express.Router()
+    const server = app.listen()
 
     function handler1(req, res, next){
       res.setHeader('x-user-id', String(req.params.id))
@@ -30,11 +31,11 @@ describe('app.router', () => {
 
     app.get('/user/:id', handler1, router, handler2)
 
-    request(app)
+    request(server)
     .get('/user/1')
     .expect('x-router', 'undefined')
     .expect('x-user-id', '1')
-    .expect(200, '1', done)
+    .expect(200, '1', () => server.close(done))
   })
 
   describe('methods', () => {
@@ -382,6 +383,7 @@ describe('app.router', () => {
 
     it('should restore req.params', (t, done) => {
       const app = express()
+      const server = app.listen()
       const router = new express.Router({ mergeParams: true })
 
       router.get('/user-(\\w+)/(.*)', (req, res, next) => {
@@ -395,9 +397,9 @@ describe('app.router', () => {
         })
       })
 
-      request(app)
+      request(server)
       .get('/user/id-42/user-tj/profile')
-      .expect(200, '[["0","42"]]', done)
+      .expect(200, '[["0","42"]]', () => server.close(done))
     })
   })
 

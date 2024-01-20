@@ -2,6 +2,7 @@
 ===
 
   * deps: Remove setprototypeof
+  * no longer need to call the restore method to restore `req.params` after invoking router
 
 5.x
 ===

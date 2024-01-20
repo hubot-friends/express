@@ -75,7 +75,9 @@
     "method-override": "^3.0.0",
     "morgan": "^1.10.0",
     "multiparty": "^4.2.3",
+    "online": "^0.0.1",
     "pbkdf2-password": "^1.2.1",
+    "redis": "^4.6.12",
     "supertest": "^6.3.3",
     "vhost": "^3.0.2"
   },

@@ -35,9 +35,13 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
 // this will allow "GET /style.css" instead of "GET /css/style.css":
 app.use(express.static(path.join(__dirname, 'public', 'css')));
 
-app.listen(process.env.PORT || 3000);
-console.log(`listening on port ${process.env.PORT || 3000}`);
-console.log('try:');
-console.log('  GET /hello.txt');
-console.log('  GET /js/app.js');
-console.log('  GET /css/style.css');
+if (!require.main) {
+    const server = app.listen();
+    app.close = () => server.close();
+    console.log(`Express started on port ${server.address().port}`);
+    console.log('try:');
+    console.log('  GET /hello.txt');
+    console.log('  GET /js/app.js');
+    console.log('  GET /css/style.css');
+}
+  

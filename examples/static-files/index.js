@@ -36,12 +36,11 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public', 'css')));
 
 if (!require.main) {
-    const server = app.listen();
-    app.close = () => server.close();
-    console.log(`Express started on port ${server.address().port}`);
-    console.log('try:');
-    console.log('  GET /hello.txt');
-    console.log('  GET /js/app.js');
-    console.log('  GET /css/style.css');
+  const server = app.listen();
+  app.close = () => server.close();
+  console.log(`Express started on port ${server.address().port}`);
+  console.log('try:');
+  console.log('  GET /hello.txt');
+  console.log('  GET /js/app.js');
+  console.log('  GET /css/style.css');
 }
-  

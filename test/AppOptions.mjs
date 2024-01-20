@@ -69,7 +69,7 @@ describe('OPTIONS', () => {
     const router = new express.Router()
 
     router.get('/users', (req, res) => {})
-    app.use(router)
+    app.use(router.handle.bind(router))
     app.get('/other', (req, res) => {})
 
     request(server)
@@ -90,7 +90,7 @@ describe('OPTIONS', () => {
         res.writeHead(200)
         next()
       })
-      app.use(router)
+      app.use(router.handle.bind(router))
       app.use((err, req, res, next) => {
         res.end('true')
       })

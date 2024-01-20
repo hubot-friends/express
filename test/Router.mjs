@@ -8,7 +8,7 @@ import { describe, it } from 'node:test'
 describe('Router', () => {
   it('should return a function with router methods', () =>  {
     const router = new Router()
-    assert(typeof router === 'function')
+    assert(router instanceof Router)
 
     assert(typeof router.get === 'function')
     assert(typeof router.handle === 'function')
@@ -22,7 +22,7 @@ describe('Router', () => {
     another.get('/bar', (req, res) => {
       res.end()
     })
-    router.use('/foo', another)
+    router.use('/foo', another.handle.bind(another))
 
     router.handle({ url: '/foo/bar', method: 'GET' }, { end: done}, done)
   })
@@ -35,7 +35,7 @@ describe('Router', () => {
       assert.strictEqual(req.params.bar, 'route')
       res.end()
     })
-    router.use('/:foo', another)
+    router.use('/:foo', another.handle.bind(another))
 
     router.handle({ url: '/test/route', method: 'GET' }, { end: done}, done)
   })
@@ -472,9 +472,9 @@ describe('Router', () => {
         req.user = user
         next()
       })
-
-      router.use('/foo/:user/', new Router())
-      router.use('/foo/:user/', sub)
+      const r = new Router()
+      router.use('/foo/:user/', r.handle.bind(r))
+      router.use('/foo/:user/', sub.handle.bind(sub))
 
       router.handle(req, {}, err => {
         if (err) return done(err)
@@ -499,9 +499,9 @@ describe('Router', () => {
         req.user = user
         next()
       })
-
-      router.use('/foo/:user/', new Router())
-      router.use('/:user/bob/', sub)
+      const r = new Router()
+      router.use('/foo/:user/', r.handle.bind(r))
+      router.use('/:user/bob/', sub.handle.bind(sub))
 
       router.handle(req, {}, err => {
         if (err) return done(err)
@@ -530,9 +530,9 @@ describe('Router', () => {
         req.ms = ms
         setTimeout(next, ms)
       })
-
-      router.use('/foo/:ms/', new Router())
-      router.use('/foo/:ms/', sub)
+      const r = new Router()
+      router.use('/foo/:ms/', r.handle.bind(r))
+      router.use('/foo/:ms/', sub.handle.bind(sub))
 
       router.handle(req1, {}, function(err) {
         assert.ifError(err)

@@ -29,7 +29,7 @@ describe('app.router', () => {
       next()
     })
 
-    app.get('/user/:id', handler1, router, handler2)
+    app.get('/user/:id', handler1, router.handle.bind(router), handler2)
 
     request(server)
     .get('/user/1')
@@ -275,7 +275,7 @@ describe('app.router', () => {
         res.send(req.params)
       })
 
-      app.use('/user/:user', router)
+      app.use('/user/:user', router.handle.bind(router))
 
       request(app)
       .get('/user/1/get')
@@ -291,7 +291,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]]))
       })
 
-      app.use('/user/:user', router)
+      app.use('/user/:user', router.handle.bind(router))
 
       request(app)
       .get('/user/tj/get')
@@ -307,7 +307,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/:thing', router)
+      app.use('/user/:thing', router.handle.bind(router))
 
       request(app)
       .get('/user/tj/get')
@@ -323,7 +323,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id-(\\d+)', router)
+      app.use('/user/id-(\\d+)', router.handle.bind(router))
 
       request(app)
       .get('/user/id-10/profile.json')
@@ -339,7 +339,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id-(\\d+)/name-(\\w+)', router)
+      app.use('/user/id-(\\d+)/name-(\\w+)', router.handle.bind(router))
 
       request(app)
       .get('/user/id-10/name-tj/profile')
@@ -355,7 +355,7 @@ describe('app.router', () => {
         res.send(keys.map(k => [k, req.params[k]] ))
       })
 
-      app.use('/user/id-(\\d+)', router)
+      app.use('/user/id-(\\d+)', router.handle.bind(router))
 
       request(app)
       .get('/user/id-10/name-tj')
@@ -373,7 +373,7 @@ describe('app.router', () => {
 
       app.use('/user/', (req, res, next) => {
         req.params = 3; // wat?
-        router(req, res, next)
+        router.handle(req, res, next)
       })
 
       request(app)
@@ -870,7 +870,7 @@ describe('app.router', () => {
         res.end('failure')
       })
 
-      app.use(router)
+      app.use(router.handle.bind(router))
 
       app.get('/foo', (req, res) => {
         res.end('success')
@@ -958,7 +958,7 @@ describe('app.router', () => {
         res.send('saw ' + err.name + ': ' + err.message)
       })
 
-      app.use(router)
+      app.use(router.handle.bind(router))
 
       request(app)
       .get('/')
@@ -977,7 +977,7 @@ describe('app.router', () => {
         res.send('saw ' + err.name + ': ' + err.message)
       })
 
-      app.use(router)
+      app.use(router.handle.bind(router))
 
       request(app)
       .get('/')
@@ -997,7 +997,7 @@ describe('app.router', () => {
         done(new Error('Unexpected middleware invoke'))
       })
 
-      app.use(router)
+      app.use(router.handle.bind(router))
 
       request(app)
       .get('/foo')
@@ -1021,7 +1021,7 @@ describe('app.router', () => {
           res.send('saw ' + err.name + ': ' + err.message)
         })
 
-        app.use(router)
+        app.use(router.handle.bind(router))
 
         request(app)
         .get('/')
@@ -1044,7 +1044,7 @@ describe('app.router', () => {
           res.send('saw ' + err.name + ': ' + err.message)
         })
 
-        app.use(router)
+        app.use(router.handle.bind(router))
 
         request(app)
         .get('/')
@@ -1068,7 +1068,7 @@ describe('app.router', () => {
           done(new Error('Unexpected middleware invoke'))
         })
 
-        app.use(router)
+        app.use(router.handle.bind(router))
 
         request(app)
         .get('/foo')

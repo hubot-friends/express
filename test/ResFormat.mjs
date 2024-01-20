@@ -146,7 +146,7 @@ describe('res', () => {
         res.send('Supports: ' + err.types.join(', '))
       })
 
-      app.use(router)
+      app.use(router.handle.bind(router))
 
       test(app)
     })

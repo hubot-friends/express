@@ -25,7 +25,7 @@ describe('req', () => {
       sub.get('/:b', (req, res) => {
         res.end(req.baseUrl)
       })
-      app.use('/:a', sub)
+      app.use('/:a', sub.handle.bind(sub))
 
       request(app)
       .get('/foo/bar')
@@ -41,9 +41,9 @@ describe('req', () => {
       sub3.get('/:d', (req, res) => {
         res.end(req.baseUrl)
       })
-      sub2.use('/:c', sub3)
-      sub1.use('/:b', sub2)
-      app.use('/:a', sub1)
+      sub2.use('/:c', sub3.handle.bind(sub3))
+      sub1.use('/:b', sub2.handle.bind(sub2))
+      app.use('/:a', sub1.handle.bind(sub1))
 
       request(app)
       .get('/foo/bar/baz/zed')
@@ -61,12 +61,12 @@ describe('req', () => {
         urls.push('0@' + req.baseUrl)
         next()
       })
-      sub2.use('/:c', sub3)
+      sub2.use('/:c', sub3.handle.bind(sub3))
       sub1.use('/', (req, res, next) => {
         urls.push('1@' + req.baseUrl)
         next()
       })
-      sub1.use('/bar', sub2)
+      sub1.use('/bar', sub2.handle.bind(sub2))
       sub1.use('/bar', (req, res, next) => {
         urls.push('2@' + req.baseUrl)
         next()
@@ -75,7 +75,7 @@ describe('req', () => {
         urls.push('3@' + req.baseUrl)
         next()
       })
-      app.use('/:a', sub1)
+      app.use('/:a', sub1.handle.bind(sub1))
       app.use((req, res, next) => {
         urls.push('4@' + req.baseUrl)
         res.end(urls.join(','))

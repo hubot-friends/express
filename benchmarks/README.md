@@ -88,3 +88,63 @@ Redesigned Express to not create a prototype chain on the req/res objects. The f
 | Req/Sec | 52,095 | 52,095 | 65,439 | 65,855 | 62,758.4 | 5,344.96 | 52,088 |
 | Bytes/Sec | 12.4 MB | 12.4 MB | 15.6 MB | 15.7 MB | 14.9 MB | 1.27 MB | 12.4 MB |
 
+## 01/20/2024, 02:15:46 PM
+    Application Version: 4.0.0
+    Node Version: v18.18.2
+    Number of Middelware: 1
+
+
+| Stat | 2.5% | 50% | 97.5% | 99% | Avg | Stdev | Max |
+|:-----|:----:|:---:|:-----:|:---:|:---:|:-----:|:---:|
+| Latency | 9 ms | 20 ms | 25 ms | 34 ms | 16.86 ms | 6 ms | 68 ms |
+
+| Stat | 1% | 2.5% | 50% | 97.5% | Avg | Stdev | Min |
+|:-----|:--:|:----:|:---:|:-----:|:---:|:-----:|:---:|
+| Req/Sec | 54,431 | 54,431 | 58,207 | 59,327 | 57,520 | 1,687.71 | 54,403 |
+| Bytes/Sec | 13 MB | 13 MB | 13.9 MB | 14.1 MB | 13.7 MB | 403 kB | 12.9 MB |
+
+## 01/20/2024, 02:16:19 PM
+    Application Version: 4.0.0
+    Node Version: v19.9.0
+    Number of Middelware: 1
+
+
+| Stat | 2.5% | 50% | 97.5% | 99% | Avg | Stdev | Max |
+|:-----|:----:|:---:|:-----:|:---:|:---:|:-----:|:---:|
+| Latency | 9 ms | 18 ms | 21 ms | 25 ms | 15.43 ms | 5.36 ms | 67 ms |
+
+| Stat | 1% | 2.5% | 50% | 97.5% | Avg | Stdev | Min |
+|:-----|:--:|:----:|:---:|:-----:|:---:|:-----:|:---:|
+| Req/Sec | 58,303 | 58,303 | 64,127 | 64,799 | 62,793.6 | 2,397.86 | 58,275 |
+| Bytes/Sec | 13.9 MB | 13.9 MB | 15.3 MB | 15.4 MB | 14.9 MB | 570 kB | 13.9 MB |
+
+## 01/20/2024, 02:16:34 PM
+    Application Version: 4.0.0
+    Node Version: v20.10.0
+    Number of Middelware: 1
+
+
+| Stat | 2.5% | 50% | 97.5% | 99% | Avg | Stdev | Max |
+|:-----|:----:|:---:|:-----:|:---:|:---:|:-----:|:---:|
+| Latency | 7 ms | 18 ms | 20 ms | 25 ms | 15.18 ms | 14.64 ms | 522 ms |
+
+| Stat | 1% | 2.5% | 50% | 97.5% | Avg | Stdev | Min |
+|:-----|:--:|:----:|:---:|:-----:|:---:|:-----:|:---:|
+| Req/Sec | 61,183 | 61,183 | 64,351 | 65,983 | 63,635.2 | 1,807.61 | 61,165 |
+| Bytes/Sec | 14.6 MB | 14.6 MB | 15.3 MB | 15.7 MB | 15.1 MB | 429 kB | 14.6 MB |
+
+## 01/20/2024, 02:17:00 PM
+    Application Version: 4.0.0
+    Node Version: v21.5.0
+    Number of Middelware: 1
+
+
+| Stat | 2.5% | 50% | 97.5% | 99% | Avg | Stdev | Max |
+|:-----|:----:|:---:|:-----:|:---:|:---:|:-----:|:---:|
+| Latency | 8 ms | 17 ms | 19 ms | 21 ms | 14.27 ms | 16.27 ms | 590 ms |
+
+| Stat | 1% | 2.5% | 50% | 97.5% | Avg | Stdev | Min |
+|:-----|:--:|:----:|:---:|:-----:|:---:|:-----:|:---:|
+| Req/Sec | 58,751 | 58,751 | 69,951 | 70,911 | 67,593.61 | 4,583.76 | 58,720 |
+| Bytes/Sec | 14 MB | 14 MB | 16.6 MB | 16.9 MB | 16.1 MB | 1.09 MB | 14 MB |
+

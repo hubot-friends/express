@@ -3,6 +3,7 @@ import express from '../index.js'
 import autocannon from 'autocannon'
 import prettyBytes from 'pretty-bytes'
 import fs from 'node:fs'
+import pkg from '../package.json' assert { type: 'json'}
 
 const toMs = (ns) => {
     return `${Math.floor(ns * 100) / 100} ms`;
@@ -98,6 +99,7 @@ const toHtmlTable = (data) => {
 }
 const app = express()
 let n = parseInt(process.env.MW || '1', 10)
+const numberOfMiddleware = n
 console.log('  %s middleware', n)
 while (n--) {
   app.use(function(req, res, next){
@@ -109,16 +111,25 @@ app.use((req, res) => {
 })
 const server = app.listen()
 const { port } = server.address()
+function formatTitle (config, numberOfMiddleware) {
+    const date = new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
+    return `## ${date}
+    Application Version: ${config.version}
+    Node Version: ${process.version}
+    Number of Middelware: ${numberOfMiddleware}
+`
+
+}
 autocannon({
   url: `http://localhost:${port}/?foo[bar]=baz`,
   pipelining: 10, 
   connections: 100,
   duration: 5,
-  title: 'Version 3',
+  title: formatTitle(pkg, numberOfMiddleware),
   workers: 4
 }, (err, result) => {
   console.log(toTable(result))
-  fs.appendFile(`benchmarks/README.md`, `## ${result.title} - ${new Date().toLocaleString()}
+  fs.appendFile(`benchmarks/README.md`, `${result.title}
 ${toTable(result)}\n`, 'utf8', () => {
       server.close()
   })
